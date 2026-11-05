@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="notaPageTitle">E-Nota & Cetak QR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="service-config.js"></script>
+  <style>
+    :root {
+      --bg-canvas: #EBE9E2;
+      --font-sans: 'Chivo', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    ::selection {
+      background-color: #111113;
+      color: #FFFFFF;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: #111113;
+      font-family: var(--font-sans);
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .font-mono-code {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .perforated-divider {
+      border-top: 1px dashed #C4C1B6;
+    }
+
+    @media print {
+      body {
+        background: #FFFFFF !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-ticket {
+        box-shadow: none !important;
+        border: 1px solid #000000 !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen py-8 px-4 flex flex-col items-center">
+
+  <!-- ACTION TOOLBAR -->
+  <div class="no-print w-full max-w-[440px] mb-5 flex items-center justify-between gap-2">
+    <a id="backToPublicBtn" href="index.html" class="h-9 px-3 rounded-[10px] bg-white border border-[#C4C1B6] text-xs font-semibold text-[#111113] inline-flex items-center gap-1.5 hover:border-[#111113] transition-colors shrink-0">
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg>
+      <span>Kembali</span>
+    </a>
+
+    <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 justify-end">
+      <label for="notaOrderSelector" class="sr-only">Pilih Nota</label>
+      <select
+        id="notaOrderSelector"
+        onchange="switchNotaOrder(this.value)"
+        class="h-9 px-2 sm:px-2.5 rounded-[10px] bg-white border border-[#C4C1B6] font-mono-code text-xs font-semibold text-[#111113] min-w-0 flex-1 sm:flex-initial max-w-[165px] sm:max-w-none"
+      ></select>
+
+      <button
+        type="button"
+        onclick="window.print()"
+        class="h-9 px-3 sm:px-3.5 rounded-[10px] bg-[#111113] hover:bg-[#27272A] text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
+      >
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+        <span>Cetak Nota</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- RECEIPT CARD -->
+  <article class="print-ticket w-full max-w-[440px] bg-white rounded-2xl border border-[#C4C1B6] overflow-hidden">
+    <div class="p-5 sm:p-6 bg-[#111113] text-white">
+      <h1 id="ticketBrandName" class="text-lg sm:text-xl font-extrabold tracking-tight text-white">KULTUR KICKS LAB</h1>
+      <p id="ticketAddress" class="text-xs text-[#A09F9A] mt-1 leading-relaxed">Jl. Margonda Raya No. 412, Depok</p>
+    </div>
+
+    <div class="p-5 sm:p-6 space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div class="text-xs text-[#78766F]">Nomor Nota</div>
+          <div id="ticketOrderId" class="font-mono-code text-2xl font-bold text-[#111113] mt-0.5">KLK-2601</div>
+        </div>
+        <span id="ticketStageBadge" class="px-3 py-1 rounded-full font-mono-code text-xs font-bold bg-[#111113] text-white">
+          Tahap 3/5
+        </span>
+      </div>
+
+      <div class="perforated-divider pt-4 space-y-2.5 text-xs">
+        <div class="flex justify-between gap-4">
+          <span class="text-[#78766F] shrink-0">Pelanggan</span>
+          <span id="ticketCustomer" class="font-bold text-[#111113] text-right">-</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-[#78766F] shrink-0">WhatsApp</span>
+          <span id="ticketPhone" class="font-mono-code text-[#111113] text-right">-</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-[#78766F] shrink-0">Unit Barang</span>
+          <span id="ticketItem" class="font-bold text-[#111113] text-right">-</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-[#78766F] shrink-0">Paket Layanan</span>
+          <span id="ticketService" class="font-semibold text-[#111113] text-right">-</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-[#78766F] shrink-0">Serah Terima</span>
+          <span id="ticketDelivery" class="text-[#111113] text-right">-</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-[#78766F] shrink-0">Estimasi Selesai</span>
+          <span id="ticketEta" class="font-mono-code font-bold text-[#111113] text-right">-</span>
+        </div>
+      </div>
+
+      <div class="perforated-divider pt-4">
+        <div class="text-xs font-bold text-[#111113] mb-2.5">Status Tahapan Pengerjaan (1–5)</div>
+        <div id="ticketStepsList" class="space-y-1.5 text-xs"></div>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-[#F5F4F0] border border-[#DCDAD2] text-xs">
+        <div class="font-bold text-[#111113] mb-1">Catatan Teknisi</div>
+        <p id="ticketTechNote" class="text-[#4A4945] leading-relaxed">-</p>
+      </div>
+
+      <div class="perforated-divider pt-4 flex items-center justify-between gap-4">
+        <div>
+          <div class="text-xs text-[#78766F]">Total Biaya</div>
+          <div id="ticketTotalPrice" class="font-mono-code text-2xl font-extrabold text-[#111113] mt-0.5">Rp 0</div>
+          <div class="text-[11px] text-[#78766F] mt-1">Scan QR untuk lacak progres</div>
+        </div>
+        <div class="p-2 rounded-xl border border-[#DCDAD2] bg-white shrink-0">
+          <img id="ticketQrImg" src="" alt="QR Code Live Tracker" width="80" height="80" class="block rounded" />
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <script>
+    let activeSlug = window.getActiveMitraSlug();
+    let activeTenant = null;
+
+    function initNotaPage() {
+      activeSlug = window.getActiveMitraSlug();
+      activeTenant = window.ServiceStore.getTenant(activeSlug);
+      if (!activeTenant) return;
+
+      window.applyWorkshopTheme(activeTenant.themePreset);
+      document.getElementById("backToPublicBtn").href = `index.html?mitra=${encodeURIComponent(activeTenant.slug)}`;
+      document.getElementById("ticketBrandName").textContent = activeTenant.name;
+      document.getElementById("ticketAddress").textContent = `${activeTenant.address} · WA ${activeTenant.whatsapp}`;
+
+      const orders = activeTenant.orders || [];
+      const params = new URLSearchParams(window.location.search);
+      const requestedCode = params.get("order") || params.get("resi");
+      const currentOrd = orders.find(o => o.orderId === requestedCode) || orders[0];
+
+      const sel = document.getElementById("notaOrderSelector");
+      sel.innerHTML = orders.map(o => `<option value="${o.orderId}" ${currentOrd && o.orderId === currentOrd.orderId ? "selected" : ""}>${o.orderId} — ${o.customerName}</option>`).join("");
+
+      if (currentOrd) {
+        renderTicketDetails(currentOrd);
+      }
+    }
+
+    function switchNotaOrder(orderId) {
+      const ord = (activeTenant.orders || []).find(o => o.orderId === orderId);
+      if (ord) renderTicketDetails(ord);
+    }
+
+    function renderTicketDetails(ord) {
+      const nicheDef = window.NICHE_DEFINITIONS[activeTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const curStep = Math.min(Math.max(Number(ord.stepIndex) || 1, 1), 5);
+
+      document.getElementById("notaPageTitle").textContent = `Nota ${ord.orderId} · ${activeTenant.name}`;
+      document.getElementById("ticketOrderId").textContent = ord.orderId;
+      document.getElementById("ticketStageBadge").textContent = `Tahap ${curStep}/5`;
+      document.getElementById("ticketCustomer").textContent = ord.customerName;
+      document.getElementById("ticketPhone").textContent = ord.phone;
+      document.getElementById("ticketItem").textContent = ord.itemName;
+      document.getElementById("ticketService").textContent = ord.serviceName;
+      document.getElementById("ticketDelivery").textContent = ord.deliveryType;
+      document.getElementById("ticketEta").textContent = ord.etaDate;
+      document.getElementById("ticketTechNote").textContent = ord.techNote;
+      document.getElementById("ticketTotalPrice").textContent = window.formatRupiah(ord.price);
+
+      const stepsHtml = nicheDef.steps.map(s => {
+        const done = s.step <= curStep;
+        return `
+          <div class="flex items-center justify-between py-1 ${done ? "text-[#111113] font-semibold" : "text-[#78766F]"}">
+            <span class="flex items-center gap-2">
+              <span class="font-mono-code text-[11px] w-5">${done ? "[x]" : "[ ]"}</span>
+              <span>Tahap ${s.step} · ${s.label}</span>
+            </span>
+            <span class="font-mono-code text-[11px]">${s.code}</span>
+          </div>
+        `;
+      }).join("");
+      document.getElementById("ticketStepsList").innerHTML = stepsHtml;
+
+      const trackUrl = `${window.location.origin}${window.location.pathname.replace("nota.html", "index.html")}?mitra=${activeTenant.slug}&resi=${ord.orderId}`;
+      document.getElementById("ticketQrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=${encodeURIComponent(trackUrl)}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", initNotaPage);
+  </script>
+</body>
+</html>

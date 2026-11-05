@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="analyticsPageTitle">Laporan Omzet Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="service-config.js"></script>
+  <style>
+    :root {
+      --op-canvas: #0B0B0D;
+      --op-surface: #121215;
+      --op-elevated: #18181C;
+      --op-border: #242429;
+      --op-text: #F3F2EE;
+      --op-muted: #A09F9A;
+      --op-dim: #6E6D68;
+      --brand: #D9381E;
+      --font-sans: 'Chivo', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    ::selection {
+      background-color: var(--brand);
+      color: #FFFFFF;
+    }
+
+    body {
+      background: linear-gradient(180deg, #111114 0%, #0B0B0D 100%);
+      color: var(--op-text);
+      font-family: var(--font-sans);
+      caret-color: var(--brand);
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-mono-code {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--brand);
+      outline-offset: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0B0D;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2C2C34;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-30 py-3.5 bg-[#0E0E11]/90 backdrop-blur-md border-b border-[#242429] px-4 sm:px-6 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div id="anLogoBox" class="w-9 h-9 rounded-[10px] bg-[#18181C] border border-[#2E2E36] font-mono-code font-bold text-xs text-white flex items-center justify-center shrink-0 overflow-hidden">
+        KLK
+      </div>
+      <div>
+        <div class="flex flex-wrap items-center gap-2">
+          <h1 id="anBrandTitle" class="font-bold text-sm sm:text-base text-white">KULTUR KICKS LAB</h1>
+          <span class="px-2 py-0.5 rounded-full text-[11px] bg-[#18181C] border border-[#2E2E36] text-[#A09F9A]">Laporan Omzet</span>
+        </div>
+        <p id="anBranchText" class="text-xs text-[#A09F9A] mt-0.5">Margonda, Depok</p>
+      </div>
+    </div>
+
+    <div class="w-full sm:w-auto grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-2">
+      <label for="anTenantSelector" class="sr-only">Pilih Mitra</label>
+      <select
+        id="anTenantSelector"
+        onchange="switchAnalyticsTenant(this.value)"
+        class="col-span-3 sm:w-auto h-9 px-2.5 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-semibold text-white focus:outline-none cursor-pointer"
+      ></select>
+
+      <a id="anAdminLink" href="admin.html" class="h-9 px-2.5 sm:px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-[#F3F2EE] inline-flex items-center justify-center transition-colors">
+        Panel Kasir
+      </a>
+
+      <a id="anPublicLink" href="index.html" class="h-9 px-2.5 sm:px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-[#A09F9A] hover:text-white inline-flex items-center justify-center transition-colors">
+        Web Publik
+      </a>
+
+      <button
+        type="button"
+        onclick="exportAnalyticsCsv()"
+        style="background-color: var(--brand);"
+        class="h-9 px-2.5 sm:px-3.5 rounded-[10px] hover:opacity-95 text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 transition-opacity cursor-pointer"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        <span>Export CSV</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-[1300px] w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- 4-METRIC FINANCIAL SUMMARY -->
+    <section aria-label="Metrik Utama" class="bg-[#121215] rounded-2xl border border-[#242429] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#242429]">
+      <div class="p-5">
+        <div class="text-xs text-[#A09F9A]">Total Omzet</div>
+        <div id="metricGrossRev" class="mt-1.5 font-mono-code text-2xl font-bold text-white">Rp 0</div>
+        <div class="mt-1 text-[11px] text-[#6E6D68]">Seluruh nota terdaftar</div>
+      </div>
+      <div class="p-5">
+        <div class="text-xs text-[#A09F9A]">Pendapatan Cair (Tahap 5)</div>
+        <div id="metricCompletedRev" class="mt-1.5 font-mono-code text-2xl font-bold text-white">Rp 0</div>
+        <div id="metricCompletedSub" class="mt-1 text-[11px] text-[#6E6D68]">0 nota selesai</div>
+      </div>
+      <div class="p-5">
+        <div class="text-xs text-[#A09F9A]">Piutang Mengendap di Rak (Tahap 1–4)</div>
+        <div id="metricPipelineRev" class="mt-1.5 font-mono-code text-2xl font-bold text-white">Rp 0</div>
+        <div id="metricPipelineSub" class="mt-1 text-[11px] text-[#6E6D68]">0 unit aktif</div>
+      </div>
+      <div class="p-5">
+        <div class="text-xs text-[#A09F9A]">Rata-Rata Nilai Nota</div>
+        <div id="metricAvgTicket" class="mt-1.5 font-mono-code text-2xl font-bold text-white">Rp 0</div>
+        <div class="mt-1 text-[11px] text-[#6E6D68]">Per transaksi</div>
+      </div>
+    </section>
+
+    <!-- FIX #6: VISUALISASI RASIO KAS CAIR (TAHAP 5) VS PIUTANG MENGENDAP DI RAK (TAHAP 1-4) -->
+    <section aria-label="Rasio Kas Cair vs Piutang Mengendap" class="bg-[#121215] rounded-2xl border border-[#242429] p-5 sm:p-6 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="text-base font-bold text-white">Rasio Kas Cair vs Piutang Mengendap di Rak</h2>
+          <p class="text-xs text-[#A09F9A] mt-0.5">Perbandingan langsung antara uang kas siap serah terima (Tahap 5) dan uang yang masih tertahan di antrean pengerjaan (Tahap 1–4).</p>
+        </div>
+        <span id="cashRatioSummaryBadge" class="font-mono-code text-xs px-2.5 py-1 rounded-full bg-[#18181C] border border-[#2E2E36] text-white">
+          0% Cair · 0% di Rak
+        </span>
+      </div>
+
+      <!-- Split Bar -->
+      <div class="w-full h-3.5 rounded-full bg-[#18181C] border border-[#242429] overflow-hidden flex">
+        <div id="cashLiquidBar" style="width: 50%; background-color: var(--brand);" class="h-full transition-all duration-300"></div>
+        <div id="cashStuckBar" style="width: 50%;" class="h-full bg-[#3A3A44] transition-all duration-300"></div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+        <div class="p-4 rounded-xl bg-[#18181C] border border-[#242429] flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: var(--brand);"></span>
+            <div>
+              <div class="text-xs font-bold text-white">Pendapatan Cair (Tahap 5 · Siap Serah Terima)</div>
+              <div id="ratioDoneCountText" class="text-[11px] text-[#A09F9A] mt-0.5">0 unit siap diambil pelanggan</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div id="ratioDoneAmountText" class="font-mono-code text-sm font-bold text-white">Rp 0</div>
+            <div id="ratioDonePctText" class="font-mono-code text-[11px] text-[#A09F9A]">0%</div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[#18181C] border border-[#242429] flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#52525B] shrink-0"></span>
+            <div>
+              <div class="text-xs font-bold text-white">Piutang Mengendap di Rak (Tahap 1–4)</div>
+              <div id="ratioStuckCountText" class="text-[11px] text-[#A09F9A] mt-0.5">0 unit masih dikerjakan teknisi</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div id="ratioStuckAmountText" class="font-mono-code text-sm font-bold text-white">Rp 0</div>
+            <div id="ratioStuckPctText" class="font-mono-code text-[11px] text-[#A09F9A]">0%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BREAKDOWN PANELS -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <section class="lg:col-span-7 bg-[#121215] rounded-2xl border border-[#242429] p-5 sm:p-6 space-y-5">
+        <div class="pb-3 border-b border-[#242429]">
+          <h2 class="text-base font-bold text-white">Kontribusi Omzet per Paket</h2>
+        </div>
+
+        <div id="serviceRevenueBars" class="space-y-4"></div>
+      </section>
+
+      <section class="lg:col-span-5 bg-[#121215] rounded-2xl border border-[#242429] p-5 sm:p-6 space-y-5">
+        <div class="pb-3 border-b border-[#242429]">
+          <h2 class="text-base font-bold text-white">Distribusi Antrean per Tahap</h2>
+        </div>
+
+        <div id="stageDistributionList" class="space-y-2.5"></div>
+
+        <div class="pt-4 border-t border-[#242429]">
+          <h3 class="text-xs font-bold text-white mb-3">Metode Serah Terima</h3>
+          <div id="deliverySplitMount" class="grid grid-cols-2 gap-3"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- FULL AUDIT LEDGER TABLE -->
+    <section class="bg-[#121215] rounded-2xl border border-[#242429] overflow-hidden">
+      <div class="px-5 py-4 border-b border-[#242429] flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-base font-bold text-white">Jurnal Transaksi</h2>
+        <span id="ledgerCountBadge" class="font-mono-code text-xs text-[#A09F9A]">0 nota</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead class="hidden md:table-header-group">
+            <tr class="border-b border-[#242429] bg-[#16161A] text-xs font-semibold text-[#A09F9A]">
+              <th class="py-3 px-4">Nota</th>
+              <th class="py-3 px-4">Pelanggan</th>
+              <th class="py-3 px-4">Unit Barang</th>
+              <th class="py-3 px-4">Paket Layanan</th>
+              <th class="py-3 px-4">Serah Terima</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4 text-right">Biaya</th>
+            </tr>
+          </thead>
+          <tbody id="auditLedgerBody" class="divide-y divide-[#242429] text-xs"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    let currentSlug = window.getActiveMitraSlug();
+    let currentTenant = null;
+
+    function initAnalyticsPage() {
+      localStorage.setItem("ws_super_admin_mode", "true");
+      currentSlug = window.getActiveMitraSlug();
+      currentTenant = window.ServiceStore.getTenant(currentSlug);
+      if (!currentTenant) return;
+
+      window.applyWorkshopTheme(currentTenant.themePreset);
+      renderHeaderAndLinks();
+      renderMetricsAndCharts();
+      renderAuditLedger();
+    }
+
+    function renderHeaderAndLinks() {
+      const initials = currentTenant.name.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "LAB";
+      document.getElementById("analyticsPageTitle").textContent = `Laporan · ${currentTenant.name}`;
+      const logoBox = document.getElementById("anLogoBox");
+      if (currentTenant.logoUrl) {
+        logoBox.innerHTML = `<img src="${currentTenant.logoUrl}" alt="${currentTenant.name}" class="w-full h-full object-cover" onerror="this.parentElement.textContent='${initials}'" />`;
+      } else {
+        logoBox.textContent = initials;
+      }
+      document.getElementById("anBrandTitle").textContent = currentTenant.name;
+      document.getElementById("anBranchText").textContent = currentTenant.branch;
+
+      const all = window.ServiceStore.getAllTenants();
+      const sel = document.getElementById("anTenantSelector");
+      sel.innerHTML = all.map(t => `<option value="${t.slug}" ${t.slug === currentTenant.slug ? "selected" : ""}>${t.name} (${t.branch})</option>`).join("");
+
+      const q = `?mitra=${encodeURIComponent(currentTenant.slug)}`;
+      document.getElementById("anAdminLink").href = `admin.html${q}`;
+      document.getElementById("anPublicLink").href = `index.html${q}`;
+    }
+
+    function switchAnalyticsTenant(newSlug) {
+      localStorage.setItem("active_mitra_slug", newSlug);
+      const url = new URL(window.location.href);
+      url.searchParams.set("mitra", newSlug);
+      window.history.replaceState({}, "", url.toString());
+      initAnalyticsPage();
+    }
+
+    function renderMetricsAndCharts() {
+      const orders = currentTenant.orders || [];
+      const nicheDef = window.NICHE_DEFINITIONS[currentTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const steps = nicheDef.steps;
+
+      const gross = orders.reduce((s, o) => s + (Number(o.price) || 0), 0);
+      const doneOrders = orders.filter(o => Number(o.stepIndex) === 5);
+      const pipeOrders = orders.filter(o => Number(o.stepIndex) < 5);
+
+      const doneRev = doneOrders.reduce((s, o) => s + (Number(o.price) || 0), 0);
+      const pipeRev = pipeOrders.reduce((s, o) => s + (Number(o.price) || 0), 0);
+      const avgTicket = orders.length > 0 ? Math.round(gross / orders.length) : 0;
+
+      document.getElementById("metricGrossRev").textContent = window.formatRupiah(gross);
+      document.getElementById("metricCompletedRev").textContent = window.formatRupiah(doneRev);
+      document.getElementById("metricCompletedSub").textContent = `${doneOrders.length} nota selesai`;
+      document.getElementById("metricPipelineRev").textContent = window.formatRupiah(pipeRev);
+      document.getElementById("metricPipelineSub").textContent = `${pipeOrders.length} unit tertahan di rak`;
+      document.getElementById("metricAvgTicket").textContent = window.formatRupiah(avgTicket);
+
+      // Fix #6: Visualisasi Rasio Kas Cair vs Piutang Mengendap di Rak
+      const donePct = gross > 0 ? Math.round((doneRev / gross) * 100) : 0;
+      const stuckPct = gross > 0 ? (100 - donePct) : 0;
+
+      document.getElementById("cashRatioSummaryBadge").textContent = `${donePct}% Cair · ${stuckPct}% Mengendap di Rak`;
+      document.getElementById("cashLiquidBar").style.width = `${donePct}%`;
+      document.getElementById("cashStuckBar").style.width = `${stuckPct}%`;
+
+      document.getElementById("ratioDoneCountText").textContent = `${doneOrders.length} unit siap serah terima`;
+      document.getElementById("ratioDoneAmountText").textContent = window.formatRupiah(doneRev);
+      document.getElementById("ratioDonePctText").textContent = `${donePct}% dari total omzet`;
+
+      document.getElementById("ratioStuckCountText").textContent = `${pipeOrders.length} unit masih di rak pengerjaan`;
+      document.getElementById("ratioStuckAmountText").textContent = window.formatRupiah(pipeRev);
+      document.getElementById("ratioStuckPctText").textContent = `${stuckPct}% dari total omzet`;
+
+      const srvMap = {};
+      orders.forEach(o => {
+        const key = o.serviceName || "Layanan Lain";
+        if (!srvMap[key]) srvMap[key] = { count: 0, rev: 0 };
+        srvMap[key].count += 1;
+        srvMap[key].rev += Number(o.price) || 0;
+      });
+
+      const srvEntries = Object.entries(srvMap).sort((a, b) => b[1].rev - a[1].rev);
+      const barsMount = document.getElementById("serviceRevenueBars");
+      if (srvEntries.length === 0) {
+        barsMount.innerHTML = `<div class="text-xs text-[#6E6D68]">Belum ada transaksi.</div>`;
+      } else {
+        barsMount.innerHTML = srvEntries.map(([name, stat]) => {
+          const pct = gross > 0 ? Math.round((stat.rev / gross) * 100) : 0;
+          return `
+            <div class="space-y-1.5">
+              <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span class="font-semibold text-white">${name} <span class="text-[#6E6D68]">(${stat.count} nota)</span></span>
+                <span class="font-mono-code font-bold text-white">${window.formatRupiah(stat.rev)} · ${pct}%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-[#18181C] overflow-hidden">
+                <div class="h-full rounded-full" style="width: ${Math.max(pct, 6)}%; background-color: var(--brand);"></div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      const stageMount = document.getElementById("stageDistributionList");
+      stageMount.innerHTML = steps.map(s => {
+        const count = orders.filter(o => Number(o.stepIndex) === s.step).length;
+        const isStage5 = s.step === 5;
+        return `
+          <div class="p-3 rounded-xl bg-[#18181C] border border-[#242429] flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full shrink-0" style="${isStage5 ? 'background-color: var(--brand);' : 'background-color: #52525B;'}"></span>
+              <span class="text-xs font-semibold text-white">Tahap ${s.step} · ${s.label}</span>
+            </div>
+            <div class="font-mono-code text-xs font-bold text-white">${count} unit</div>
+          </div>
+        `;
+      }).join("");
+
+      const dropCount = orders.filter(o => (o.deliveryType || "").toLowerCase().includes("drop")).length;
+      const pickCount = orders.length - dropCount;
+      document.getElementById("deliverySplitMount").innerHTML = `
+        <div class="p-3 rounded-xl bg-[#18181C] border border-[#242429]">
+          <div class="text-[11px] text-[#A09F9A]">Drop-Off Studio</div>
+          <div class="font-mono-code text-lg font-bold text-white mt-0.5">${dropCount} Nota</div>
+        </div>
+        <div class="p-3 rounded-xl bg-[#18181C] border border-[#242429]">
+          <div class="text-[11px] text-[#A09F9A]">Jemput Kurir</div>
+          <div class="font-mono-code text-lg font-bold text-white mt-0.5">${pickCount} Nota</div>
+        </div>
+      `;
+    }
+
+    function renderAuditLedger() {
+      const orders = currentTenant.orders || [];
+      const nicheDef = window.NICHE_DEFINITIONS[currentTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      document.getElementById("ledgerCountBadge").textContent = `${orders.length} nota`;
+
+      const tbody = document.getElementById("auditLedgerBody");
+      tbody.innerHTML = orders.map(o => {
+        const stepMeta = nicheDef.steps[(Number(o.stepIndex) || 1) - 1] || nicheDef.steps[0];
+        const isDone = Number(o.stepIndex) === 5;
+        return `
+          <tr class="block md:table-row p-4 md:p-0 space-y-2 md:space-y-0 hover:bg-[#18181C]/60">
+            <td class="block md:table-cell p-0 md:py-3 md:px-4 font-mono-code font-bold text-white md:whitespace-nowrap">
+              <div class="flex items-center justify-between md:block gap-2">
+                <span>${o.orderId}</span>
+                <span class="md:hidden font-mono-code font-bold text-white">${window.formatRupiah(o.price)}</span>
+              </div>
+            </td>
+            <td class="block md:table-cell p-0 md:py-3 md:px-4">
+              <div class="flex items-center justify-between md:block gap-2">
+                <div class="font-semibold text-white">${o.customerName}</div>
+                <div class="font-mono-code text-[11px] text-[#6E6D68]">${o.phone}</div>
+              </div>
+            </td>
+            <td class="block md:table-cell p-0 md:py-3 md:px-4 text-white font-medium md:font-normal">${o.itemName}</td>
+            <td class="block md:table-cell p-0 md:py-3 md:px-4 text-[#A09F9A]">${o.serviceName}</td>
+            <td class="hidden md:table-cell py-3 px-4 text-[#A09F9A]">${o.deliveryType}</td>
+            <td class="block md:table-cell p-0 pt-1 md:pt-3 md:py-3 md:px-4 md:whitespace-nowrap">
+              <div class="flex items-center justify-between md:block gap-2">
+                <span style="${isDone ? 'background-color: var(--brand); color: #FFFFFF;' : ''}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                  isDone ? "" : "bg-[#18181C] border border-[#2E2E36] text-[#F3F2EE]"
+                }">Tahap ${o.stepIndex}/5 · ${stepMeta.label}</span>
+                <span class="md:hidden text-[11px] text-[#A09F9A]">${o.deliveryType}</span>
+              </div>
+            </td>
+            <td class="hidden md:table-cell py-3 px-4 text-right font-mono-code font-bold text-white whitespace-nowrap">${window.formatRupiah(o.price)}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function exportAnalyticsCsv() {
+      const orders = currentTenant.orders || [];
+      const headers = ["Order_ID", "Customer_Name", "Phone", "Item_Name", "Service_Package", "Stage_1_to_5", "Delivery_Type", "ETA", "Price_IDR", "Technician_Note"];
+      const rows = orders.map(o => [
+        o.orderId,
+        `"${(o.customerName || "").replace(/"/g, '""')}"`,
+        o.phone,
+        `"${(o.itemName || "").replace(/"/g, '""')}"`,
+        `"${(o.serviceName || "").replace(/"/g, '""')}"`,
+        o.stepIndex,
+        `"${(o.deliveryType || "").replace(/"/g, '""')}"`,
+        `"${(o.etaDate || "").replace(/"/g, '""')}"`,
+        o.price,
+        `"${(o.techNote || "").replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `laporan-${currentTenant.slug}-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    window.addEventListener("ws-cloud-synced", initAnalyticsPage);
+    document.addEventListener("DOMContentLoaded", initAnalyticsPage);
+  </script>
+</body>
+</html>

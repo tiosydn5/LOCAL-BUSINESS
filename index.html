@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="pageTitle">Studio Care & Live Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="service-config.js"></script>
+  <style>
+    :root {
+      --bg-canvas: #F5F4F0;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #EBE9E2;
+      --bg-obsidian: #111113;
+      --ink-primary: #111113;
+      --ink-secondary: #4A4945;
+      --ink-muted: #78766F;
+      --border-hairline: #DCDAD2;
+      --border-strong: #C4C1B6;
+      --brand: #D9381E;
+      --brand-hover: #B82B14;
+      --brand-light: #FF6B52;
+      --brand-fg: #FFFFFF;
+      --font-sans: 'Chivo', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    ::selection {
+      background-color: var(--brand);
+      color: var(--brand-fg);
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--ink-primary);
+      font-family: var(--font-sans);
+      caret-color: var(--brand);
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    .font-mono-code {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    a {
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--brand);
+      outline-offset: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-canvas);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C4C1B6;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9C998E;
+    }
+
+    details > summary {
+      list-style: none;
+    }
+    details > summary::-webkit-details-marker {
+      display: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP DEMO & TENANT BAR (Hidden by default for public customers; shown only in ?mode=demo or Super Admin session) -->
+  <div id="topDemoBar" class="hidden bg-[#111113] text-[#F3F2EE] border-b border-[#242429]">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2 h-2 rounded-full bg-[var(--brand)]"></span>
+        <span class="text-[#A09F9A]">Simulasi Mitra:</span>
+        <label for="demoTenantSelector" class="sr-only">Pilih Mitra Studio</label>
+        <select id="demoTenantSelector" onchange="switchTenantDemo(this.value)" class="bg-[#1C1C21] text-[#F3F2EE] border border-[#2E2E36] rounded-[8px] px-2.5 py-1 text-xs font-medium focus:outline-none cursor-pointer">
+        </select>
+      </div>
+      <div class="flex items-center gap-4">
+        <a id="topPitchLink" href="pitch.html" class="text-[#A09F9A] hover:text-white transition-colors">
+          Pitching B2B
+        </a>
+        <span class="text-[#2E2E36]">|</span>
+        <a id="topAdminLink" href="admin.html" class="inline-flex items-center gap-1.5 text-[#F3F2EE] hover:text-white font-semibold transition-colors">
+          <span>Panel Kasir</span>
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+        <button type="button" onclick="togglePublicDemoBar(false)" class="text-[#6E6D68] hover:text-white cursor-pointer" title="Sembunyikan bar demo">
+          Tutup Demo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKY NAVIGATION HEADER -->
+  <header class="sticky top-0 z-40 bg-[#F5F4F0]/95 backdrop-blur-md border-b border-[#DCDAD2]">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4">
+      <a href="#top" class="flex items-center gap-2.5 sm:gap-3 group focus:outline-none min-w-0">
+        <div id="navLogoBox" class="w-9 h-9 rounded-[10px] bg-[#111113] text-white font-mono-code font-bold text-xs flex items-center justify-center tracking-tight shrink-0 overflow-hidden">
+          KLK
+        </div>
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <span id="navBrandName" class="font-bold text-sm sm:text-base tracking-tight text-[#111113] leading-tight">KULTUR KICKS LAB</span>
+            <span id="navNicheBadge" class="hidden sm:inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#EBE9E2] text-[#4A4945] border border-[#DCDAD2]">Sneaker Lab</span>
+          </div>
+          <p id="navBranchText" class="text-[11px] sm:text-xs text-[#78766F] mt-0.5 leading-tight">Margonda, Depok</p>
+        </div>
+      </a>
+
+      <nav aria-label="Navigasi Utama" class="hidden md:flex items-center gap-6 text-sm font-medium text-[#4A4945]">
+        <a href="#trackerSection" class="hover:text-[#111113] transition-colors">Cek Resi</a>
+        <a href="#sopSection" class="hover:text-[#111113] transition-colors">Standar Pengerjaan</a>
+        <a href="#catalogSection" class="hover:text-[#111113] transition-colors">Daftar Paket</a>
+        <a href="#bookingSection" class="hover:text-[#111113] transition-colors">Booking</a>
+        <a href="#faqSection" class="hover:text-[#111113] transition-colors">FAQ</a>
+      </nav>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="#bookingSection" class="inline-flex items-center gap-2 px-3 sm:px-4 h-9 sm:py-2 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white text-xs sm:text-sm font-semibold transition-colors">
+          <span>Booking Layanan</span>
+        </a>
+        <button
+          type="button"
+          onclick="toggleMobileNav()"
+          aria-label="Buka Menu Navigasi"
+          class="md:hidden w-9 h-9 rounded-[10px] border border-[#DCDAD2] bg-white text-[#111113] inline-flex items-center justify-center shrink-0 cursor-pointer"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- COMPACT 2x2 GRID MOBILE DRAWER -->
+    <div id="mobileNavDrawer" class="hidden md:hidden border-t border-[#DCDAD2] bg-[#F5F4F0] px-4 py-3 space-y-2.5">
+      <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-[#111113]">
+        <a href="#trackerSection" onclick="toggleMobileNav(false)" class="p-2.5 rounded-xl bg-white border border-[#DCDAD2] flex items-center justify-between">
+          <span>Cek Resi</span>
+          <svg class="w-3.5 h-3.5 text-[#78766F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </a>
+        <a href="#sopSection" onclick="toggleMobileNav(false)" class="p-2.5 rounded-xl bg-white border border-[#DCDAD2] flex items-center justify-between">
+          <span>Standar Pengerjaan</span>
+          <svg class="w-3.5 h-3.5 text-[#78766F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </a>
+        <a href="#catalogSection" onclick="toggleMobileNav(false)" class="p-2.5 rounded-xl bg-white border border-[#DCDAD2] flex items-center justify-between">
+          <span>Daftar Paket</span>
+          <svg class="w-3.5 h-3.5 text-[#78766F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+        </a>
+        <a href="#faqSection" onclick="toggleMobileNav(false)" class="p-2.5 rounded-xl bg-white border border-[#DCDAD2] flex items-center justify-between">
+          <span>FAQ & Lokasi</span>
+          <svg class="w-3.5 h-3.5 text-[#78766F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </a>
+      </div>
+      <a href="#bookingSection" onclick="toggleMobileNav(false)" class="w-full h-9 rounded-xl bg-[#111113] text-white text-xs font-semibold flex items-center justify-center gap-1.5">
+        <span>Kalkulator & Booking WA</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="top" class="flex-1">
+    <!-- FIRST VIEWPORT: HERO + LIVE TRACKER -->
+    <section id="trackerSection" class="py-10 sm:py-14 border-b border-[#DCDAD2]">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+          
+          <!-- Left 7 Columns: Headline + Live Receipt Search -->
+          <div class="lg:col-span-7 flex flex-col justify-between">
+            <div>
+              <h1 class="text-[2rem] sm:text-[2.75rem] lg:text-[3.25rem] font-extrabold tracking-[-0.03em] leading-[1.08] text-[#111113] [text-wrap:balance]">
+                <span id="heroHeadline1">Restorasi Presisi untuk</span>
+                <span id="heroHeadline2" class="block text-[var(--brand)] mt-1">Koleksi Sepatu Harian.</span>
+              </h1>
+
+              <p id="heroDescText" class="mt-4 text-sm sm:text-base text-[#4A4945] leading-[1.6] max-w-[54ch]">
+                Studio perawatan sepatu berstandar laboratorium. Lacak tahapan pengerjaan barang Anda secara langsung tanpa perlu menunggu balasan admin.
+              </p>
+
+              <div id="dynamicHeroImgWrap" class="hidden mt-4 rounded-2xl overflow-hidden border border-[#DCDAD2] bg-[#EBE9E2] h-40 sm:h-48 max-w-[54ch]"></div>
+
+              <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EBE9E2] border border-[#DCDAD2] text-xs font-medium text-[#4A4945]">
+                <span class="w-2 h-2 rounded-full bg-[var(--brand)]"></span>
+                <span id="heroBadgeLocation">Sneakers & Apparel Care · Margonda, Depok</span>
+              </div>
+            </div>
+
+            <!-- Live Receipt Lookup Box (Supports Order Code, Name, or WhatsApp Phone Number) -->
+            <div class="mt-7 bg-white rounded-2xl border border-[#DCDAD2] p-5 sm:p-6">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <label for="resiSearchInput" class="text-sm font-bold text-[#111113]">
+                  Cek Status Nota atau Nomor WhatsApp
+                </label>
+                <span class="text-xs text-[#78766F]">Update langsung dari meja teknisi</span>
+              </div>
+
+              <form onsubmit="event.preventDefault(); handleTrackOrder();" class="flex flex-col sm:flex-row gap-2.5">
+                <input
+                  id="resiSearchInput"
+                  type="text"
+                  placeholder="Ketik Kode Nota (KLK-2601) atau No. WA Anda"
+                  autocomplete="off"
+                  class="flex-1 h-11 px-4 rounded-[10px] bg-[#F5F4F0] border border-[#C4C1B6] text-[#111113] font-mono-code font-semibold text-sm placeholder:font-sans placeholder:font-normal placeholder:text-[#78766F] focus:bg-white focus:border-[#111113] focus:outline-none transition-colors"
+                />
+                <button
+                  type="submit"
+                  class="h-11 px-5 rounded-[10px] bg-[#111113] hover:bg-[var(--brand)] text-white font-semibold text-sm inline-flex items-center justify-center gap-2 transition-colors shrink-0 cursor-pointer"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <span>Lacak Status</span>
+                </button>
+              </form>
+
+              <div class="mt-3.5 pt-3.5 border-t border-[#EBE9E2] flex flex-wrap items-center gap-2">
+                <span class="text-xs text-[#78766F]">Contoh nota aktif:</span>
+                <div id="sampleResiChips" class="flex flex-wrap gap-1.5"></div>
+              </div>
+            </div>
+
+            <!-- Studio Quick Info Strip -->
+            <div class="mt-7 pt-6 border-t border-[#DCDAD2] grid grid-cols-2 sm:grid-cols-4 gap-5">
+              <div>
+                <div class="text-xs text-[#78766F]">Rating Studio</div>
+                <div class="mt-1 flex items-baseline gap-1">
+                  <span id="statRatingScore" class="font-mono-code text-lg font-bold text-[#111113]">4.9</span>
+                  <span class="text-xs text-[#78766F]">/ 5.0</span>
+                </div>
+              </div>
+              <div class="sm:border-l sm:border-[#DCDAD2] sm:pl-4">
+                <div class="text-xs text-[#78766F]">Antrean Aktif</div>
+                <div class="mt-1 flex items-baseline gap-1.5">
+                  <span id="statActiveCount" class="font-mono-code text-lg font-bold text-[#111113]">3</span>
+                  <span class="text-xs text-[#4A4945]">Unit</span>
+                </div>
+              </div>
+              <div class="sm:border-l sm:border-[#DCDAD2] sm:pl-4">
+                <div class="text-xs text-[#78766F]">Serah Terima</div>
+                <div id="statDeliveryMode" class="mt-1 text-xs sm:text-sm font-bold text-[#111113] leading-snug">Jemput & Antar</div>
+              </div>
+              <div class="sm:border-l sm:border-[#DCDAD2] sm:pl-4">
+                <div class="text-xs text-[#78766F]">Jam Buka</div>
+                <div id="statHoursShort" class="mt-1 text-xs sm:text-sm font-bold text-[#111113] leading-snug">10.00 – 21.00 WIB</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right 5 Columns: LIVE TRACKER PANEL -->
+          <div class="lg:col-span-5">
+            <div class="bg-[#111113] text-[#F3F2EE] rounded-2xl border border-[#242429] overflow-hidden">
+              <div class="px-5 py-3.5 bg-[#16161A] border-b border-[#242429] flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold text-[#F3F2EE]">Detail Status Pengerjaan</span>
+                <span class="inline-flex items-center gap-1.5 text-xs text-[#A09F9A]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[var(--brand)]"></span>
+                  <span>Live Tracker</span>
+                </span>
+              </div>
+
+              <div id="trackerResultMount" class="p-5 sm:p-6">
+                <!-- Populated by renderTrackedOrder() -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: STANDAR PENGERJAAN & PERAWATAN MATERIAL -->
+    <section id="sopSection" class="py-12 sm:py-16 border-b border-[#DCDAD2]">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <div class="pb-6 border-b border-[#DCDAD2]">
+          <h2 class="text-2xl sm:text-3xl font-bold tracking-[-0.025em] text-[#111113]">
+            Alur Pengerjaan & Spesifikasi Perawatan Bahan
+          </h2>
+          <p class="mt-1.5 text-sm sm:text-base text-[#4A4945] max-w-[60ch]">
+            Setiap unit melewati tahapan terukur menggunakan cairan dan alat yang disesuaikan dengan karakteristik material.
+          </p>
+        </div>
+
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div class="lg:col-span-7 bg-white rounded-2xl border border-[#DCDAD2] overflow-hidden">
+            <div class="px-5 py-3.5 bg-[#F5F4F0] border-b border-[#DCDAD2] flex items-center justify-between text-xs font-semibold text-[#4A4945]">
+              <span>Tahapan Standar Operasional</span>
+              <span class="text-[#78766F] font-normal">Klik baris untuk lihat rincian</span>
+            </div>
+            <div id="sopStepsMount" class="divide-y divide-[#EBE9E2]"></div>
+          </div>
+
+          <div class="lg:col-span-5 bg-white rounded-2xl border border-[#DCDAD2] overflow-hidden">
+            <div class="px-5 py-3.5 bg-[#F5F4F0] border-b border-[#DCDAD2] flex items-center justify-between text-xs font-semibold text-[#4A4945]">
+              <span>Penanganan Komponen & Alat</span>
+              <span id="anatomyUnitTag" class="text-[#78766F] font-normal">Spesifikasi Teknis</span>
+            </div>
+            <div id="anatomyZonesMount" class="divide-y divide-[#EBE9E2]"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: SERVICE CATALOG WITH CURATED REAL PHOTOS -->
+    <section id="catalogSection" class="py-12 sm:py-16 border-b border-[#DCDAD2]">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[#DCDAD2]">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold tracking-[-0.025em] text-[#111113]">
+              Daftar Paket Layanan
+            </h2>
+            <p class="mt-1.5 text-sm sm:text-base text-[#4A4945]">
+              Pilih paket perawatan sesuai kebutuhan barang Anda untuk langsung menghitung estimasi biaya.
+            </p>
+          </div>
+          <div id="serviceCategoryPills" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <div id="serviceCatalogMount" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Populated by renderServiceCatalog() -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: INTERACTIVE BOOKING & AUTO-ORDER GENERATOR -->
+    <section id="bookingSection" class="py-12 sm:py-16 border-b border-[#DCDAD2]">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <div class="max-w-[60ch] mb-8">
+          <h2 class="text-2xl sm:text-3xl font-bold tracking-[-0.025em] text-[#111113]">
+            Kalkulator Estimasi & Form Booking
+          </h2>
+          <p class="mt-1.5 text-sm sm:text-base text-[#4A4945]">
+            Isi rincian barang di bawah ini. Saat dikirim, sistem otomatis menerbitkan Nomor Nota Tahap 1 dan meneruskan pesanan ke WhatsApp admin.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- Left 7 Cols: Booking Form -->
+          <form id="bookingForm" onsubmit="event.preventDefault(); submitBookingToWhatsApp();" class="lg:col-span-7 bg-white rounded-2xl border border-[#DCDAD2] p-5 sm:p-7 space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="bookCustomerName" class="block text-xs font-bold text-[#111113] mb-1.5">Nama Pelanggan</label>
+                <input
+                  id="bookCustomerName"
+                  type="text"
+                  required
+                  placeholder="cth: Raka Pratama"
+                  oninput="recalculateBooking()"
+                  class="w-full h-11 px-3.5 rounded-[10px] bg-[#F5F4F0] border border-[#C4C1B6] text-sm text-[#111113] focus:bg-white focus:border-[#111113] focus:outline-none"
+                />
+              </div>
+              <div>
+                <label for="bookCustomerPhone" class="block text-xs font-bold text-[#111113] mb-1.5">Nomor WhatsApp</label>
+                <input
+                  id="bookCustomerPhone"
+                  type="tel"
+                  required
+                  placeholder="cth: 081288990011"
+                  oninput="recalculateBooking()"
+                  class="w-full h-11 px-3.5 rounded-[10px] bg-[#F5F4F0] border border-[#C4C1B6] text-sm font-mono-code text-[#111113] focus:bg-white focus:border-[#111113] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="sm:col-span-2">
+                <label for="bookItemName" class="block text-xs font-bold text-[#111113] mb-1.5">Tipe Barang & Warna</label>
+                <input
+                  id="bookItemName"
+                  type="text"
+                  required
+                  placeholder="Salomon XT-6 White / Jordan 1 Low"
+                  oninput="recalculateBooking()"
+                  class="w-full h-11 px-3.5 rounded-[10px] bg-[#F5F4F0] border border-[#C4C1B6] text-sm text-[#111113] focus:bg-white focus:border-[#111113] focus:outline-none"
+                />
+              </div>
+              <div>
+                <label for="bookQtyInput" class="block text-xs font-bold text-[#111113] mb-1.5">Jumlah (<span id="unitLabelSpan">Pasang</span>)</label>
+                <div class="flex items-center h-11 rounded-[10px] bg-[#F5F4F0] border border-[#C4C1B6] overflow-hidden">
+                  <button type="button" onclick="adjustBookingQty(-1)" aria-label="Kurangi jumlah" class="w-10 h-full flex items-center justify-center text-[#111113] hover:bg-[#EBE9E2] font-bold transition-colors cursor-pointer">−</button>
+                  <input
+                    id="bookQtyInput"
+                    type="number"
+                    min="1"
+                    max="20"
+                    value="1"
+                    oninput="recalculateBooking()"
+                    class="w-full h-full text-center bg-transparent font-mono-code font-bold text-sm text-[#111113] focus:outline-none"
+                  />
+                  <button type="button" onclick="adjustBookingQty(1)" aria-label="Tambah jumlah" class="w-10 h-full flex items-center justify-center text-[#111113] hover:bg-[#EBE9E2] font-bold transition-colors cursor-pointer">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label for="bookServiceSelect" class="block text-xs font-bold text-[#111113] mb-1.5">Paket Layanan Utama</label>
+              <select
+                id="bookServiceSelect"
+                onchange="recalculateBooking()"
+                class="w-full h-11 px-3.5 rounded-[10px] bg-[#F5F4F0] border border-[#C4C1B6] text-sm font-semibold text-[#111113] focus:bg-white focus:border-[#111113] focus:outline-none cursor-pointer"
+              ></select>
+            </div>
+
+            <div>
+              <div class="text-xs font-bold text-[#111113] mb-2">Layanan Tambahan (Opsional)</div>
+              <div id="bookAddonsMount" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </div>
+
+            <div>
+              <div class="text-xs font-bold text-[#111113] mb-2">Metode Serah Terima</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label class="flex items-start gap-3 p-3.5 rounded-xl border border-[#C4C1B6] bg-[#F5F4F0] cursor-pointer hover:border-[#111113] transition-colors">
+                  <input type="radio" name="deliveryMode" value="Drop-Off Studio" checked onchange="recalculateBooking()" class="mt-0.5 accent-[#111113]" />
+                  <div>
+                    <div class="text-sm font-bold text-[#111113]">Antar ke Studio</div>
+                    <div class="text-xs text-[#78766F] mt-0.5">Serah terima langsung di lokasi</div>
+                  </div>
+                </label>
+                <label class="flex items-start gap-3 p-3.5 rounded-xl border border-[#C4C1B6] bg-[#F5F4F0] cursor-pointer hover:border-[#111113] transition-colors">
+                  <input type="radio" name="deliveryMode" value="Pick-Up Kurir" onchange="recalculateBooking()" class="mt-0.5 accent-[#111113]" />
+                  <div>
+                    <div class="text-sm font-bold text-[#111113]">Jemput & Antar Kurir</div>
+                    <div id="pickupPolicyHint" class="text-xs text-[#78766F] mt-0.5">Dijemput kurir ke alamat Anda</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label for="bookNotesInput" class="block text-xs font-bold text-[#111113] mb-1.5">Catatan Kondisi / Alamat Jemput</label>
+              <textarea
+                id="bookNotesInput"
+                rows="2"
+                placeholder="Contoh: Ada noda di bagian depan / Jemput sore di Jl. Margonda..."
+                oninput="recalculateBooking()"
+                class="w-full p-3.5 rounded-[10px] bg-[#F5F4F0] border border-[#C4C1B6] text-sm text-[#111113] focus:bg-white focus:border-[#111113] focus:outline-none"
+              ></textarea>
+            </div>
+          </form>
+
+          <!-- Right 5 Cols: Itemized Summary -->
+          <div class="lg:col-span-5 bg-[#111113] text-[#F3F2EE] rounded-2xl border border-[#242429] overflow-hidden">
+            <div class="px-6 py-4 bg-[#16161A] border-b border-[#242429] flex items-center justify-between gap-2">
+              <div>
+                <div class="font-bold text-sm text-white">Ringkasan Tiket Booking</div>
+                <div id="summaryTenantName" class="text-xs text-[#A09F9A] mt-0.5">KULTUR KICKS LAB · Depok</div>
+              </div>
+              <span class="font-mono-code text-[11px] px-2.5 py-1 rounded-full bg-[#242429] text-[#D4D4D8]">AUTO-NOTA</span>
+            </div>
+
+            <div class="p-6 space-y-4">
+              <div class="space-y-2.5 text-sm">
+                <div class="flex justify-between gap-4">
+                  <span class="text-[#A09F9A] shrink-0">Pelanggan</span>
+                  <span id="summaryCustomer" class="font-semibold text-right text-white">Belum diisi</span>
+                </div>
+                <div class="flex justify-between gap-4">
+                  <span class="text-[#A09F9A] shrink-0">Unit Barang</span>
+                  <span id="summaryItem" class="font-semibold text-right text-white">1 Pasang</span>
+                </div>
+                <div class="flex justify-between gap-4">
+                  <span class="text-[#A09F9A] shrink-0">Serah Terima</span>
+                  <span id="summaryDelivery" class="text-right text-[#F3F2EE]">Drop-Off Studio</span>
+                </div>
+                <div class="flex justify-between gap-4">
+                  <span class="text-[#A09F9A] shrink-0">Estimasi Durasi</span>
+                  <span id="summaryDuration" class="font-mono-code text-xs text-right text-white">2–3 Hari</span>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-[#242429] space-y-2.5 text-sm">
+                <div class="flex justify-between gap-4">
+                  <span id="summaryBaseServiceLabel" class="text-[#A09F9A]">Paket Utama</span>
+                  <span id="summaryBasePrice" class="font-mono-code font-semibold text-white shrink-0">Rp 65.000</span>
+                </div>
+                <div id="summaryAddonsList" class="space-y-1.5 text-xs text-[#A09F9A]"></div>
+              </div>
+
+              <div class="pt-4 border-t border-[#242429] flex items-baseline justify-between gap-4">
+                <div>
+                  <div class="text-xs text-[#A09F9A]">Total Estimasi</div>
+                  <div class="text-[11px] text-[#6E6D68]">Otomatis menerbitkan kode nota</div>
+                </div>
+                <div id="summaryTotalPrice" class="font-mono-code text-2xl font-bold text-white">Rp 65.000</div>
+              </div>
+
+              <button
+                type="button"
+                onclick="submitBookingToWhatsApp()"
+                class="w-full h-11 mt-2 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white font-bold text-sm inline-flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <span>Terbitkan Nota & Kirim WA</span>
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: FAQ & STUDIO LOCATION -->
+    <section id="faqSection" class="py-12 sm:py-16">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div class="lg:col-span-5 space-y-4">
+            <h2 class="text-2xl font-bold tracking-[-0.025em] text-[#111113]">
+              Informasi Studio & Tanya Jawab
+            </h2>
+            <p id="footerPickupPolicy" class="text-sm text-[#4A4945] leading-relaxed">
+              Gratis jemput & antar radius 5 km area Depok (min. 2 pasang).
+            </p>
+            <div class="bg-white rounded-2xl border border-[#DCDAD2] p-5 space-y-3.5 text-sm">
+              <div>
+                <div class="text-xs text-[#78766F]">Alamat Workshop</div>
+                <div id="footerAddress" class="font-semibold text-[#111113] mt-0.5">Jl. Margonda Raya No. 412, Depok</div>
+              </div>
+              <div class="pt-3 border-t border-[#EBE9E2]">
+                <div class="text-xs text-[#78766F]">Jam Operasional</div>
+                <div id="footerHours" class="font-semibold text-[#111113] mt-0.5">Setiap Hari · 10.00 – 21.00 WIB</div>
+              </div>
+              <div class="pt-3 border-t border-[#EBE9E2]">
+                <div class="text-xs text-[#78766F]">Kontak & Sosial Media</div>
+                <div class="font-semibold text-[#111113] mt-0.5">
+                  <span id="footerInstagram">@kulturkicks.depok</span> · <span id="footerWhatsapp" class="font-mono-code">6281299887766</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7">
+            <div id="faqListMount" class="bg-white rounded-2xl border border-[#DCDAD2] divide-y divide-[#EBE9E2] overflow-hidden"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-[#111113] text-[#A09F9A] border-t border-[#242429] py-8">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+      <div>
+        <span id="footerCopyrightName" class="font-bold text-white">KULTUR KICKS LAB</span>
+        <span> · Sistem Operasional & Cek Resi Studio</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-5">
+        <div id="footerDemoLinks" class="hidden items-center gap-5">
+          <a id="footerAdminLink" href="admin.html" class="hover:text-white transition-colors">Dashboard Kasir</a>
+          <a id="footerAnalyticsLink" href="analytics.html" class="hover:text-white transition-colors">Laporan Omzet</a>
+          <a id="footerPitchLink" href="pitch.html" class="hover:text-white transition-colors">Pitching B2B</a>
+        </div>
+        <button type="button" onclick="togglePublicDemoBar()" class="text-[#6E6D68] hover:text-[#A09F9A] transition-colors cursor-pointer">
+          Mode Demo
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let currentSlug = window.getActiveMitraSlug();
+    let currentTenant = null;
+    let activeCategoryFilter = "ALL";
+    let activeSopStage = null;
+    let trackedOrderObj = null;
+
+    function checkDemoVisibility() {
+      const params = new URLSearchParams(window.location.search);
+      const isUrlDemo = params.get("mode") === "demo" || params.get("demo") === "1" || params.get("admin") === "1";
+      if (isUrlDemo) {
+        localStorage.setItem("ws_super_admin_mode", "true");
+      }
+      const isSuperAdmin = localStorage.getItem("ws_super_admin_mode") === "true";
+      const topBar = document.getElementById("topDemoBar");
+      const footerLinks = document.getElementById("footerDemoLinks");
+
+      if (isSuperAdmin) {
+        topBar.classList.remove("hidden");
+        footerLinks.classList.remove("hidden");
+        footerLinks.classList.add("flex");
+      } else {
+        topBar.classList.add("hidden");
+        footerLinks.classList.add("hidden");
+        footerLinks.classList.remove("flex");
+      }
+    }
+
+    function toggleMobileNav(forceState) {
+      const drawer = document.getElementById("mobileNavDrawer");
+      if (!drawer) return;
+      const shouldShow = typeof forceState === "boolean" ? forceState : drawer.classList.contains("hidden");
+      if (shouldShow) {
+        drawer.classList.remove("hidden");
+      } else {
+        drawer.classList.add("hidden");
+      }
+    }
+
+    function togglePublicDemoBar(forceState) {
+      const current = localStorage.getItem("ws_super_admin_mode") === "true";
+      const next = typeof forceState === "boolean" ? forceState : !current;
+      localStorage.setItem("ws_super_admin_mode", next ? "true" : "false");
+      checkDemoVisibility();
+    }
+
+    function initPublicPage() {
+      checkDemoVisibility();
+      currentSlug = window.getActiveMitraSlug();
+      currentTenant = window.ServiceStore.getTenant(currentSlug);
+      if (!currentTenant) return;
+
+      window.applyWorkshopTheme(currentTenant.themePreset);
+      populateTenantSelector();
+      renderBrandingAndHero();
+      renderSampleResiChips();
+
+      const params = new URLSearchParams(window.location.search);
+      const urlResi = params.get("resi") || params.get("nota");
+      if (urlResi) {
+        document.getElementById("resiSearchInput").value = urlResi;
+        handleTrackOrder(urlResi);
+      } else if (currentTenant.orders && currentTenant.orders.length > 0) {
+        trackedOrderObj = currentTenant.orders[0];
+        renderTrackedOrder(trackedOrderObj);
+      } else {
+        renderTrackedOrder(null);
+      }
+
+      renderSopAndAnatomy();
+      renderServiceCatalog();
+      populateBookingForm();
+      renderFaqSection();
+    }
+
+    function populateTenantSelector() {
+      const sel = document.getElementById("demoTenantSelector");
+      const all = window.ServiceStore.getAllTenants();
+      sel.innerHTML = all.map(t => {
+        const selected = t.slug === currentTenant.slug ? "selected" : "";
+        return `<option value="${t.slug}" ${selected}>${t.name} (${t.branch})</option>`;
+      }).join("");
+
+      const q = `?mitra=${encodeURIComponent(currentTenant.slug)}`;
+      document.getElementById("topAdminLink").href = `admin.html${q}`;
+      document.getElementById("topPitchLink").href = `pitch.html${q}`;
+      document.getElementById("footerAdminLink").href = `admin.html${q}`;
+      document.getElementById("footerAnalyticsLink").href = `analytics.html${q}`;
+      document.getElementById("footerPitchLink").href = `pitch.html${q}`;
+    }
+
+    function switchTenantDemo(newSlug) {
+      localStorage.setItem("active_mitra_slug", newSlug);
+      const url = new URL(window.location.href);
+      url.searchParams.set("mitra", newSlug);
+      url.searchParams.delete("resi");
+      window.history.replaceState({}, "", url.toString());
+      activeCategoryFilter = "ALL";
+      activeSopStage = null;
+      initPublicPage();
+    }
+
+    function renderBrandingAndHero() {
+      const nicheDef = window.NICHE_DEFINITIONS[currentTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const initials = currentTenant.name.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "LAB";
+
+      document.getElementById("pageTitle").textContent = `${currentTenant.name} — ${currentTenant.branch}`;
+      const logoBox = document.getElementById("navLogoBox");
+      if (currentTenant.logoUrl) {
+        logoBox.innerHTML = `<img src="${currentTenant.logoUrl}" alt="${currentTenant.name}" class="w-full h-full object-cover" onerror="this.parentElement.textContent='${initials}'" />`;
+      } else {
+        logoBox.textContent = initials;
+      }
+
+      document.getElementById("navBrandName").textContent = currentTenant.name;
+      document.getElementById("navNicheBadge").textContent = nicheDef.shortLabel;
+      document.getElementById("navBranchText").textContent = currentTenant.branch;
+
+      document.getElementById("heroBadgeLocation").textContent = `${nicheDef.label} · ${currentTenant.branch}`;
+      document.getElementById("heroHeadline1").textContent = currentTenant.heroHeadline1;
+      document.getElementById("heroHeadline2").textContent = currentTenant.heroHeadline2;
+      document.getElementById("heroDescText").textContent = currentTenant.heroDesc;
+
+      let heroImgWrap = document.getElementById("dynamicHeroImgWrap");
+      if (currentTenant.heroImageUrl) {
+        if (!heroImgWrap) {
+          heroImgWrap = document.createElement("div");
+          heroImgWrap.id = "dynamicHeroImgWrap";
+          heroImgWrap.className = "mt-5 rounded-2xl overflow-hidden border border-[#DCDAD2] h-48 sm:h-56 bg-[#EBE9E2]";
+          document.getElementById("heroBadgeLocation").parentElement.appendChild(heroImgWrap);
+        }
+        heroImgWrap.innerHTML = `<img src="${currentTenant.heroImageUrl}" alt="${currentTenant.name}" class="w-full h-full object-cover" onerror="this.parentElement.remove()" />`;
+      } else if (heroImgWrap) {
+        heroImgWrap.remove();
+      }
+
+      document.getElementById("statRatingScore").textContent = currentTenant.ratingScore || "4.9";
+      document.getElementById("statActiveCount").textContent = (currentTenant.orders || []).length;
+      document.getElementById("statDeliveryMode").textContent =
+        currentTenant.serviceMode === "studio_slot" ? "Slot Studio" : "Jemput & Antar";
+      const shortHours = (currentTenant.hours || "10.00 – 21.00 WIB").split("·").pop().trim();
+      document.getElementById("statHoursShort").textContent = shortHours;
+
+      document.getElementById("footerPickupPolicy").textContent = currentTenant.pickupPolicy;
+      document.getElementById("footerAddress").textContent = currentTenant.address;
+      document.getElementById("footerHours").textContent = currentTenant.hours;
+      document.getElementById("footerInstagram").textContent = currentTenant.instagram;
+      document.getElementById("footerWhatsapp").textContent = currentTenant.whatsapp;
+      document.getElementById("footerCopyrightName").textContent = currentTenant.name;
+    }
+
+    function renderSampleResiChips() {
+      const box = document.getElementById("sampleResiChips");
+      const orders = currentTenant.orders || [];
+      if (orders.length === 0) {
+        box.innerHTML = `<span class="text-xs text-[#78766F]">Belum ada nota aktif</span>`;
+        return;
+      }
+      box.innerHTML = orders.slice(0, 4).map(o => {
+        const isCurrent = trackedOrderObj && trackedOrderObj.orderId === o.orderId;
+        return `<button type="button" onclick="selectSampleResi('${o.orderId}')" class="px-2.5 py-1 rounded-full font-mono-code text-xs font-semibold transition-colors cursor-pointer ${
+          isCurrent
+            ? "bg-[var(--brand)] text-white"
+            : "bg-[#EBE9E2] text-[#111113] hover:bg-[#DCDAD2]"
+        }">${o.orderId}</button>`;
+      }).join("");
+    }
+
+    function selectSampleResi(code) {
+      document.getElementById("resiSearchInput").value = code;
+      handleTrackOrder(code);
+    }
+
+    // Matches Order ID, Customer Name, OR Phone/WA Number
+    function handleTrackOrder(forcedCode) {
+      const inputEl = document.getElementById("resiSearchInput");
+      const raw = (forcedCode || inputEl.value || "").trim();
+      if (!raw) return;
+
+      const upper = raw.toUpperCase();
+      const digits = raw.replace(/\D/g, "");
+
+      const found = (currentTenant.orders || []).find(o => {
+        if (o.orderId.toUpperCase() === upper) return true;
+        if (o.customerName.toUpperCase().includes(upper)) return true;
+        if (digits.length >= 6) {
+          const ordDigits = (o.phone || "").replace(/\D/g, "");
+          if (ordDigits.includes(digits) || (digits.length >= 8 && ordDigits.endsWith(digits.slice(-8)))) {
+            return true;
+          }
+        }
+        return false;
+      });
+
+      trackedOrderObj = found || { notFound: true, query: raw };
+      renderSampleResiChips();
+      renderTrackedOrder(trackedOrderObj);
+      if (window.innerWidth < 1024) {
+        const trackerEl = document.getElementById("trackerResultMount");
+        if (trackerEl) trackerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+
+    function renderTrackedOrder(ord) {
+      const mount = document.getElementById("trackerResultMount");
+      const nicheDef = window.NICHE_DEFINITIONS[currentTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const steps = nicheDef.steps;
+
+      if (!ord) {
+        mount.innerHTML = `
+          <div class="py-8 text-center">
+            <p class="text-sm text-[#A09F9A]">Masukkan nomor nota atau nomor WhatsApp Anda pada kolom pencarian.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (ord.notFound) {
+        mount.innerHTML = `
+          <div class="p-4 rounded-xl bg-[#18181C] border border-[#2E2E36] space-y-2">
+            <div class="text-xs font-bold text-white">Data "${ord.query}" Tidak Ditemukan</div>
+            <p class="text-xs text-[#A09F9A] leading-relaxed">
+              Periksa kembali kode nota atau nomor WA Anda (contoh: <span class="font-mono-code text-white">${(currentTenant.orders[0] && currentTenant.orders[0].orderId) || "KLK-2601"}</span>).
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      const curStepIdx = Math.min(Math.max(Number(ord.stepIndex) || 1, 1), 5);
+      const curStepMeta = steps[curStepIdx - 1] || steps[0];
+
+      // Single Brand Accent on Active Stage + Calm Monochrome on Passed/Pending (Zero Rainbow Clash)
+      const stagePillsHtml = steps.map(s => {
+        const passed = s.step < curStepIdx;
+        const active = s.step === curStepIdx;
+        let pillClass = "bg-[#141417] border-[#222228] text-[#6E6D68]";
+        if (passed) pillClass = "bg-[#1E1E24] border-[#34343C] text-[#D4D4D8]";
+        if (active) pillClass = "bg-[var(--brand)] text-white border-[var(--brand)] font-bold";
+
+        return `
+          <div class="flex flex-col items-center justify-center py-2 px-0.5 sm:px-1 rounded-[10px] border ${pillClass} text-center min-w-0">
+            <span class="font-mono-code text-[11px] sm:text-xs">${s.step}</span>
+            <span class="text-[9px] sm:text-[10px] mt-0.5 leading-tight tracking-tight">${s.code}</span>
+          </div>
+        `;
+      }).join("");
+
+      const notaUrl = `nota.html?mitra=${encodeURIComponent(currentTenant.slug)}&order=${encodeURIComponent(ord.orderId)}`;
+      const waAskText = encodeURIComponent(
+        `Halo Admin ${currentTenant.name}, saya ingin menanyakan progres Nota *${ord.orderId}* (${ord.itemName}).`
+      );
+      const waUrl = `https://wa.me/${currentTenant.whatsapp}?text=${waAskText}`;
+
+      mount.innerHTML = `
+        <div class="space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-[#242429]">
+            <div>
+              <div class="font-mono-code text-2xl font-bold text-white tracking-tight whitespace-nowrap">${ord.orderId}</div>
+              <div class="text-xs text-[#A09F9A] mt-0.5">${ord.customerName} · ${ord.deliveryType}</div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-[#1E1E24] text-white border border-[#34343C]">
+              Tahap ${curStepIdx}/5 · ${curStepMeta.label}
+            </span>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#18181C] border border-[#242429] space-y-3">
+            <div>
+              <div class="text-xs text-[#A09F9A]">Unit & Paket Layanan</div>
+              <div class="text-sm font-bold text-white mt-0.5 leading-snug">${ord.itemName}</div>
+              <div class="text-xs text-[#D4D4D8] mt-0.5 leading-snug">${ord.serviceName}</div>
+            </div>
+            <div class="pt-3 border-t border-[#26262E] flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div>
+                <span class="text-[#A09F9A]">Estimasi: </span>
+                <span class="font-mono-code font-semibold text-white">${ord.etaDate}</span>
+              </div>
+              <div>
+                <span class="text-[#A09F9A]">Biaya: </span>
+                <span class="font-mono-code font-bold text-white">${window.formatRupiah(ord.price)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="text-[#A09F9A]">Progres Pengerjaan (1–5)</span>
+              <span class="font-mono-code text-xs text-[#D4D4D8]">${Math.round((curStepIdx / 5) * 100)}%</span>
+            </div>
+            <div class="grid grid-cols-5 gap-1.5">
+              ${stagePillsHtml}
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-[#242429]">
+            <div class="text-xs font-semibold text-[#A09F9A] mb-1.5">Catatan Teknisi</div>
+            <p class="text-xs sm:text-sm text-[#F3F2EE] leading-relaxed bg-[#18181C] p-3.5 rounded-xl border border-[#242429]">
+              "${ord.techNote || curStepMeta.defaultNote}"
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 pt-1">
+            <a href="${notaUrl}" class="h-10 px-3 rounded-[10px] bg-white hover:bg-[#E4E4E7] text-[#111113] font-semibold text-xs inline-flex items-center justify-center gap-1.5 transition-colors">
+              <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>Buka E-Nota</span>
+            </a>
+            <a href="${waUrl}" target="_blank" rel="noopener" class="h-10 px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] text-[#F3F2EE] border border-[#2E2E36] font-semibold text-xs inline-flex items-center justify-center gap-1.5 transition-colors">
+              <svg class="w-3.5 h-3.5 text-[#A09F9A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              <span>Tanya Teknisi</span>
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleSopStage(stepNum) {
+      activeSopStage = activeSopStage === stepNum ? null : stepNum;
+      renderSopAndAnatomy();
+    }
+
+    function renderSopAndAnatomy() {
+      const nicheDef = window.NICHE_DEFINITIONS[currentTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const sopMount = document.getElementById("sopStepsMount");
+
+      sopMount.innerHTML = nicheDef.steps.map(s => {
+        const isOpen = s.step === activeSopStage;
+        return `
+          <button
+            type="button"
+            onclick="toggleSopStage(${s.step})"
+            aria-expanded="${isOpen}"
+            class="w-full text-left p-4 sm:p-5 transition-colors flex items-start justify-between gap-4 cursor-pointer ${
+              isOpen ? "bg-[#F5F4F0]" : "bg-white hover:bg-[#F5F4F0]/50"
+            }"
+          >
+            <div class="flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="font-bold text-sm sm:text-base text-[#111113]">${s.label}</h3>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-[#EBE9E2] text-[#4A4945] font-medium">${s.code}</span>
+              </div>
+              <p class="text-xs sm:text-sm text-[#4A4945] mt-1 leading-relaxed">${s.desc}</p>
+              ${
+                isOpen
+                  ? `<div class="mt-3 pt-2.5 border-t border-[#DCDAD2] text-xs text-[#111113] leading-relaxed">
+                      <span class="font-semibold">Standar Laporan Teknisi:</span> "${s.defaultNote}"
+                    </div>`
+                  : ""
+              }
+            </div>
+            <svg class="w-4 h-4 text-[#78766F] shrink-0 mt-1 transition-transform ${isOpen ? "rotate-180 text-[#111113]" : ""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+        `;
+      }).join("");
+
+      const zonesMount = document.getElementById("anatomyZonesMount");
+      zonesMount.innerHTML = nicheDef.inspectionZones.map(z => `
+        <div class="p-4 sm:p-5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="font-bold text-sm text-[#111113]">${z.title}</h3>
+            <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-[#F5F4F0] border border-[#DCDAD2] text-[#4A4945] font-medium">${z.tool}</span>
+          </div>
+          <div class="text-xs text-[#78766F] mt-1">Bagian: ${z.part}</div>
+          <p class="text-xs sm:text-sm text-[#4A4945] mt-1.5 leading-relaxed">${z.detail}</p>
+        </div>
+      `).join("");
+    }
+
+    function setCategoryFilter(cat) {
+      activeCategoryFilter = cat;
+      renderServiceCatalog();
+    }
+
+    function renderServiceCatalog() {
+      const services = (currentTenant.services || []).filter(s => s.available !== false);
+      const categories = ["ALL", ...new Set(services.map(s => s.category || "Treatment"))];
+
+      const pillsMount = document.getElementById("serviceCategoryPills");
+      pillsMount.innerHTML = categories.map(cat => {
+        const active = cat === activeCategoryFilter;
+        const label = cat === "ALL" ? "Semua Paket" : cat;
+        return `
+          <button
+            type="button"
+            onclick="setCategoryFilter('${cat}')"
+            class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+              active
+                ? "bg-[#111113] text-white"
+                : "bg-white text-[#4A4945] border border-[#DCDAD2] hover:border-[#111113]"
+            }"
+          >${label}</button>
+        `;
+      }).join("");
+
+      const filtered = activeCategoryFilter === "ALL"
+        ? services
+        : services.filter(s => (s.category || "Treatment") === activeCategoryFilter);
+
+      const catalogMount = document.getElementById("serviceCatalogMount");
+      catalogMount.innerHTML = filtered.map((s, idx) => {
+        const finalPrice = s.isPromo && s.promoPrice ? s.promoPrice : s.price;
+        const imgUrl = s.imageUrl || (window.resolveWorkshopServiceImage ? window.resolveWorkshopServiceImage(s.name, s.category, currentTenant.niche, idx) : "");
+        return `
+          <div class="bg-white rounded-2xl border border-[#DCDAD2] p-4 sm:p-6 flex flex-col justify-between gap-3.5 sm:gap-4 hover:border-[#111113] transition-colors">
+            <div>
+              <div class="flex sm:block items-start gap-3.5">
+                ${imgUrl ? `<img src="${imgUrl}" alt="${s.name}" loading="lazy" class="w-20 h-20 sm:w-full sm:h-44 sm:mb-4 rounded-xl object-cover shrink-0 bg-[#EBE9E2] border border-[#DCDAD2]" onerror="this.remove()" />` : ""}
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-wrap items-start justify-between gap-1.5 sm:gap-2">
+                    <h3 class="text-sm sm:text-lg font-bold text-[#111113] leading-snug">${s.name}</h3>
+                    <span class="font-mono-code text-[11px] sm:text-xs px-2 sm:px-2.5 py-0.5 rounded-full bg-[#F5F4F0] border border-[#DCDAD2] text-[#4A4945] shrink-0">${s.duration}</span>
+                  </div>
+                  <div class="mt-1 sm:mt-1.5 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span class="text-xs text-[#78766F]">${s.category || "Signature Treatment"}</span>
+                    ${
+                      s.badge
+                        ? `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#EBE9E2] text-[#111113]">${s.badge}</span>`
+                        : ""
+                    }
+                  </div>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-[#4A4945] mt-2.5 leading-relaxed">${s.desc || "Perawatan standar studio dengan bahan teruji."}</p>
+            </div>
+
+            <div class="pt-4 border-t border-[#EBE9E2] flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="text-[11px] text-[#78766F]">Biaya Layanan</div>
+                <div class="flex items-baseline gap-2 mt-0.5">
+                  <span class="font-mono-code text-lg font-bold text-[#111113]">${window.formatRupiah(finalPrice)}</span>
+                  ${
+                    s.isPromo && s.promoPrice
+                      ? `<span class="font-mono-code text-xs text-[#78766F] line-through">${window.formatRupiah(s.price)}</span>`
+                      : ""
+                  }
+                </div>
+              </div>
+              <button
+                type="button"
+                onclick="selectServiceForBooking('${s.id}')"
+                class="h-9 px-4 rounded-[10px] bg-[#111113] hover:bg-[var(--brand)] text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>Pilih Paket</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function selectServiceForBooking(srvId) {
+      const sel = document.getElementById("bookServiceSelect");
+      if (sel) {
+        sel.value = srvId;
+        recalculateBooking();
+      }
+      document.getElementById("bookingSection").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function populateBookingForm() {
+      const nicheDef = window.NICHE_DEFINITIONS[currentTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      document.getElementById("unitLabelSpan").textContent = nicheDef.unitName;
+      document.getElementById("bookItemName").placeholder = nicheDef.itemPlaceholder;
+      document.getElementById("pickupPolicyHint").textContent = currentTenant.pickupPolicy;
+      document.getElementById("summaryTenantName").textContent = `${currentTenant.name} · ${currentTenant.branch}`;
+
+      const services = (currentTenant.services || []).filter(s => s.available !== false);
+      const sel = document.getElementById("bookServiceSelect");
+      sel.innerHTML = services.map(s => {
+        const finalPrice = s.isPromo && s.promoPrice ? s.promoPrice : s.price;
+        return `<option value="${s.id}">${s.name} — ${window.formatRupiah(finalPrice)} (${s.duration})</option>`;
+      }).join("");
+
+      const addonsMount = document.getElementById("bookAddonsMount");
+      addonsMount.innerHTML = (nicheDef.addons || []).map(a => `
+        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-[#C4C1B6] bg-[#F5F4F0] cursor-pointer hover:border-[#111113] transition-colors">
+          <input type="checkbox" name="bookingAddon" value="${a.id}" data-price="${a.price}" data-label="${a.label}" onchange="recalculateBooking()" class="mt-0.5 accent-[#111113]" />
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center justify-between gap-1">
+              <span class="text-xs font-bold text-[#111113]">${a.label}</span>
+              <span class="font-mono-code text-xs font-semibold text-[#111113]">+${window.formatRupiah(a.price)}</span>
+            </div>
+            <div class="text-[11px] text-[#78766F] mt-0.5 leading-snug">${a.desc}</div>
+          </div>
+        </label>
+      `).join("");
+
+      recalculateBooking();
+    }
+
+    function adjustBookingQty(delta) {
+      const input = document.getElementById("bookQtyInput");
+      const next = Math.min(Math.max((parseInt(input.value, 10) || 1) + delta, 1), 20);
+      input.value = next;
+      recalculateBooking();
+    }
+
+    function recalculateBooking() {
+      const nicheDef = window.NICHE_DEFINITIONS[currentTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const services = (currentTenant.services || []).filter(s => s.available !== false);
+      const selectedId = document.getElementById("bookServiceSelect").value;
+      const srv = services.find(s => s.id === selectedId) || services[0];
+      const qty = Math.max(parseInt(document.getElementById("bookQtyInput").value, 10) || 1, 1);
+
+      const customerName = document.getElementById("bookCustomerName").value.trim() || "Pelanggan Studio";
+      const itemName = document.getElementById("bookItemName").value.trim() || `${qty} ${nicheDef.unitName}`;
+      const deliveryEl = document.querySelector('input[name="deliveryMode"]:checked');
+      const deliveryMode = deliveryEl ? deliveryEl.value : "Drop-Off Studio";
+
+      const unitPrice = srv ? (srv.isPromo && srv.promoPrice ? srv.promoPrice : srv.price) : 0;
+      const baseSubtotal = unitPrice * qty;
+
+      const checkedAddons = Array.from(document.querySelectorAll('input[name="bookingAddon"]:checked'));
+      let addonsTotal = 0;
+      const addonsHtml = checkedAddons.map(cb => {
+        const p = (Number(cb.dataset.price) || 0) * qty;
+        addonsTotal += p;
+        return `<div class="flex justify-between gap-2"><span>+ ${cb.dataset.label}</span><span class="font-mono-code text-white shrink-0">${window.formatRupiah(p)}</span></div>`;
+      }).join("");
+
+      const grandTotal = baseSubtotal + addonsTotal;
+
+      document.getElementById("summaryCustomer").textContent = customerName;
+      document.getElementById("summaryItem").textContent = `${itemName} (${qty} ${nicheDef.unitName})`;
+      document.getElementById("summaryDelivery").textContent = deliveryMode;
+      document.getElementById("summaryDuration").textContent = srv ? srv.duration : "2–3 Hari";
+      document.getElementById("summaryBaseServiceLabel").textContent = srv ? srv.name : "Paket Utama";
+      document.getElementById("summaryBasePrice").textContent = window.formatRupiah(baseSubtotal);
+      document.getElementById("summaryAddonsList").innerHTML = addonsHtml;
+      document.getElementById("summaryTotalPrice").textContent = window.formatRupiah(grandTotal);
+
+      return {
+        customerName,
+        phone: document.getElementById("bookCustomerPhone").value.trim(),
+        itemName,
+        qty,
+        unitName: nicheDef.unitName,
+        serviceName: srv ? srv.name : "Treatment",
+        duration: srv ? srv.duration : "2–3 Hari",
+        deliveryMode,
+        addons: checkedAddons.map(c => c.dataset.label),
+        notes: document.getElementById("bookNotesInput").value.trim(),
+        grandTotal
+      };
+    }
+
+    // Automatically creates Stage 1 Order in ServiceStore AND opens WhatsApp with new Receipt Code
+    function submitBookingToWhatsApp() {
+      const nameInput = document.getElementById("bookCustomerName");
+      const phoneInput = document.getElementById("bookCustomerPhone");
+      const itemInput = document.getElementById("bookItemName");
+
+      if (!nameInput.value.trim()) {
+        nameInput.focus();
+        return;
+      }
+      if (!phoneInput.value.trim()) {
+        phoneInput.focus();
+        return;
+      }
+      if (!itemInput.value.trim()) {
+        itemInput.focus();
+        return;
+      }
+
+      const data = recalculateBooking();
+      const nicheDef = window.NICHE_DEFINITIONS[currentTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const prefix = currentTenant.name.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "ORD";
+      const nextNum = 2601 + (currentTenant.orders ? currentTenant.orders.length : 0);
+      const generatedOrderId = `${prefix}-${nextNum}`;
+
+      const fullServiceLabel = data.addons.length > 0
+        ? `${data.serviceName} (+${data.addons.join(", ")})`
+        : data.serviceName;
+
+      const newOrderPayload = {
+        orderId: generatedOrderId,
+        customerName: data.customerName,
+        phone: data.phone,
+        itemName: data.qty > 1 ? `${data.itemName} (${data.qty} ${data.unitName})` : data.itemName,
+        serviceName: fullServiceLabel,
+        price: data.grandTotal,
+        stepIndex: 1,
+        deliveryType: data.deliveryMode,
+        etaDate: data.duration,
+        techNote: data.notes
+          ? `Booking Web: ${data.notes}`
+          : nicheDef.steps[0].defaultNote
+      };
+
+      // Save to LocalStorage & Supabase ws_orders
+      window.ServiceStore.upsertOrder(currentTenant.slug, newOrderPayload);
+      currentTenant = window.ServiceStore.getTenant(currentTenant.slug);
+      document.getElementById("statActiveCount").textContent = (currentTenant.orders || []).length;
+      document.getElementById("resiSearchInput").value = generatedOrderId;
+      handleTrackOrder(generatedOrderId);
+
+      const notaUrl = `${window.location.origin}${window.location.pathname.replace("index.html", "")}nota.html?mitra=${encodeURIComponent(currentTenant.slug)}&order=${encodeURIComponent(generatedOrderId)}`;
+      const addonLine = data.addons.length > 0 ? `\n• Tambahan: ${data.addons.join(", ")}` : "";
+      const noteLine = data.notes ? `\n• Catatan/Alamat: ${data.notes}` : "";
+
+      const msg =
+        `Halo Admin *${currentTenant.name}* (${currentTenant.branch}), saya sudah membuat tiket booking via web:\n\n` +
+        `• No. Nota: *${generatedOrderId}*\n` +
+        `• Nama: *${data.customerName}*\n` +
+        `• WhatsApp: *${data.phone}*\n` +
+        `• Barang: *${data.itemName}* (${data.qty} ${data.unitName})\n` +
+        `• Paket: *${data.serviceName}* (${data.duration})` +
+        addonLine +
+        `\n• Serah Terima: *${data.deliveryMode}*` +
+        noteLine +
+        `\n• Estimasi Biaya: *${window.formatRupiah(data.grandTotal)}*\n\n` +
+        `Link E-Nota & QR: ${notaUrl}`;
+
+      const waUrl = `https://wa.me/${currentTenant.whatsapp}?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, "_blank", "noopener");
+    }
+
+    function renderFaqSection() {
+      const nicheDef = window.NICHE_DEFINITIONS[currentTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const mount = document.getElementById("faqListMount");
+      mount.innerHTML = (nicheDef.faqs || []).map(f => `
+        <details class="group p-5 sm:p-6">
+          <summary class="flex items-center justify-between gap-4 cursor-pointer font-bold text-sm sm:text-base text-[#111113]">
+            <span>${f.q}</span>
+            <svg class="w-4 h-4 text-[#78766F] shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <p class="mt-3 text-xs sm:text-sm text-[#4A4945] leading-relaxed">${f.a}</p>
+        </details>
+      `).join("");
+    }
+
+    window.addEventListener("ws-cloud-synced", initPublicPage);
+    document.addEventListener("DOMContentLoaded", initPublicPage);
+  </script>
+</body>
+</html>

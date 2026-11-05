@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pitching B2B & Duplikat Mitra</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="service-config.js"></script>
+  <style>
+    :root {
+      --op-canvas: #0B0B0D;
+      --op-surface: #121215;
+      --op-elevated: #18181C;
+      --op-border: #242429;
+      --brand: #D9381E;
+      --font-sans: 'Chivo', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    ::selection {
+      background-color: var(--brand);
+      color: #FFFFFF;
+    }
+
+    body {
+      background: linear-gradient(180deg, #111114 0%, #0B0B0D 100%);
+      color: #F3F2EE;
+      font-family: var(--font-sans);
+      caret-color: var(--brand);
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .font-mono-code {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--brand);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="py-3.5 border-b border-[#242429] bg-[#0E0E11]/90 backdrop-blur-md px-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-white font-mono-code font-bold text-xs flex items-center justify-center">
+        B2B
+      </div>
+      <div>
+        <h1 class="text-sm sm:text-base font-bold text-white">Generator Demo & Pitching B2B</h1>
+        <p class="text-xs text-[#A09F9A]">Duplikat sistem web & kasir untuk prospek studio</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <a href="index.html?mode=demo" class="h-9 px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-[#F3F2EE] inline-flex items-center">
+        Web Pelanggan
+      </a>
+      <a href="admin.html" class="h-9 px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-[#F3F2EE] inline-flex items-center">
+        Panel Kasir
+      </a>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-[1200px] w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- Left 5 Cols: Instant Store Generator -->
+      <section class="lg:col-span-5 bg-[#121215] rounded-2xl border border-[#242429] p-6 space-y-4">
+        <div>
+          <h2 class="text-base font-bold text-white">Buat Demo Prospek Baru</h2>
+          <p class="text-xs text-[#A09F9A] mt-1 leading-relaxed">
+            Masukkan nama bisnis calon klien untuk membuat halaman web dan panel kasir dengan nama brand mereka.
+          </p>
+        </div>
+
+        <form onsubmit="event.preventDefault(); generatePitchDemo();" class="space-y-4">
+          <div>
+            <label for="pitchBrandName" class="block text-xs font-semibold text-[#A09F9A] mb-1">Nama Toko / Studio Prospek</label>
+            <input
+              id="pitchBrandName"
+              type="text"
+              required
+              placeholder="cth: Garuda Sneaker Care"
+              oninput="syncPitchSlug(this.value)"
+              class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white focus:border-white focus:outline-none"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="pitchSlug" class="block text-xs font-semibold text-[#A09F9A] mb-1">Slug URL</label>
+              <input
+                id="pitchSlug"
+                type="text"
+                required
+                placeholder="garuda-sneaker"
+                class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] font-mono-code text-xs text-white focus:border-white focus:outline-none"
+              />
+            </div>
+            <div>
+              <label for="pitchCity" class="block text-xs font-semibold text-[#A09F9A] mb-1">Area / Kota</label>
+              <input
+                id="pitchCity"
+                type="text"
+                required
+                placeholder="Kemang, Jaksel"
+                class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white focus:border-white focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="pitchNiche" class="block text-xs font-semibold text-[#A09F9A] mb-1">Kategori Bisnis</label>
+              <select id="pitchNiche" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-semibold text-white">
+                <option value="sneakers_care">Cuci Sepatu & Apparel</option>
+                <option value="moto_detailing">Salon & Detailing Motor</option>
+              </select>
+            </div>
+            <div>
+              <label for="pitchOwnerWa" class="block text-xs font-semibold text-[#A09F9A] mb-1">WhatsApp Owner (Opsional)</label>
+              <input
+                id="pitchOwnerWa"
+                type="text"
+                placeholder="0812..."
+                class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] font-mono-code text-xs text-white focus:border-white focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            style="background-color: var(--brand);"
+            class="w-full h-10 rounded-[10px] hover:opacity-95 text-white text-xs font-bold transition-opacity cursor-pointer"
+          >
+            Buat Demo & Naskah Pitching
+          </button>
+        </form>
+      </section>
+
+      <!-- Right 7 Cols: Generated Pitch Script -->
+      <section class="lg:col-span-7 bg-[#121215] rounded-2xl border border-[#242429] p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-bold text-white">Naskah Pesan WhatsApp</h2>
+            <p class="text-xs text-[#A09F9A] mt-0.5">Tautan publik bersih dari menu demo internal.</p>
+          </div>
+          <span id="activePitchBadge" class="font-mono-code text-xs px-2.5 py-1 rounded-full bg-[#18181C] border border-[#2E2E36] text-[#D4D4D8]">
+            ?mitra=kultur-kicks
+          </span>
+        </div>
+
+        <textarea
+          id="pitchScriptArea"
+          rows="9"
+          aria-label="Naskah Pitching WhatsApp"
+          class="w-full p-4 rounded-xl bg-[#18181C] border border-[#2E2E36] font-mono-code text-xs text-[#F3F2EE] leading-relaxed focus:outline-none"
+        ></textarea>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onclick="copyPitchScript()"
+            style="background-color: var(--brand);"
+            class="h-9 px-4 rounded-[10px] hover:opacity-95 text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <span id="copyBtnLabel">Salin Naskah</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="sendPitchViaWa()"
+            class="h-9 px-4 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>Kirim via WhatsApp</span>
+          </button>
+
+          <a id="previewPublicDemoLink" href="index.html" class="h-9 px-3.5 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-[#A09F9A] hover:text-white inline-flex items-center">
+            Buka Web Demo
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <!-- ACTIVE MULTI-TENANT DIRECTORY -->
+    <section class="bg-[#121215] rounded-2xl border border-[#242429] overflow-hidden">
+      <div class="px-6 py-4 border-b border-[#242429]">
+        <h2 class="text-base font-bold text-white">Daftar Mitra Tersedia</h2>
+      </div>
+      <div id="pitchTenantsGrid" class="divide-y divide-[#242429]"></div>
+    </section>
+
+  </main>
+
+  <script>
+    let selectedSlug = window.getActiveMitraSlug();
+
+    function initPitchPage() {
+      localStorage.setItem("ws_super_admin_mode", "true");
+      selectedSlug = window.getActiveMitraSlug();
+      const tenant = window.ServiceStore.getTenant(selectedSlug);
+      if (tenant) {
+        window.applyWorkshopTheme(tenant.themePreset);
+        buildScriptForTenant(tenant);
+      }
+      renderPitchDirectory();
+    }
+
+    function syncPitchSlug(name) {
+      document.getElementById("pitchSlug").value = name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+
+    function generatePitchDemo() {
+      const name = document.getElementById("pitchBrandName").value.trim();
+      const slug = document.getElementById("pitchSlug").value.trim().toLowerCase();
+      const city = document.getElementById("pitchCity").value.trim();
+      const niche = document.getElementById("pitchNiche").value;
+      if (!name || !slug) return;
+
+      const created = window.ServiceStore.duplicateTenant("kultur-kicks", slug, name, city, niche);
+      localStorage.setItem("active_mitra_slug", slug);
+      selectedSlug = slug;
+      window.applyWorkshopTheme(created.themePreset);
+      buildScriptForTenant(created);
+      renderPitchDirectory();
+    }
+
+    function buildScriptForTenant(tenant) {
+      const baseUrl = window.location.origin + window.location.pathname.replace("pitch.html", "");
+      const pubUrl = `${baseUrl}index.html?mitra=${tenant.slug}`;
+      const admUrl = `${baseUrl}admin.html?mitra=${tenant.slug}`;
+      const sampleCode = (tenant.orders && tenant.orders[0] && tenant.orders[0].orderId) || "KLK-2601";
+
+      document.getElementById("activePitchBadge").textContent = `?mitra=${tenant.slug}`;
+      document.getElementById("previewPublicDemoLink").href = `index.html?mitra=${encodeURIComponent(tenant.slug)}`;
+
+      const script =
+        `Halo Owner *${tenant.name}* (${tenant.branch}),\n\n` +
+        `Kami menyiapkan prototipe *Sistem Cek Resi & Kasir Studio* menggunakan nama brand *${tenant.name}*:\n\n` +
+        `• Web Pelanggan & Cek Resi (Coba kode *${sampleCode}*):\n${pubUrl}\n\n` +
+        `• Panel Kasir (Update Tahap 1–5 Real-Time):\n${admUrl}\n\n` +
+        `Pelanggan dapat melacak status pengerjaan langsung dari HP tanpa perlu chat admin berulang kali. Boleh kami demokan singkat minggu ini?`;
+
+      document.getElementById("pitchScriptArea").value = script;
+    }
+
+    function copyPitchScript() {
+      const area = document.getElementById("pitchScriptArea");
+      area.select();
+      navigator.clipboard.writeText(area.value);
+      const lbl = document.getElementById("copyBtnLabel");
+      lbl.textContent = "Tersalin!";
+      setTimeout(() => { lbl.textContent = "Salin Naskah"; }, 2000);
+    }
+
+    function sendPitchViaWa() {
+      const rawPhone = (document.getElementById("pitchOwnerWa").value || "").replace(/[^0-9]/g, "").replace(/^0/, "62");
+      const text = encodeURIComponent(document.getElementById("pitchScriptArea").value);
+      const url = rawPhone ? `https://wa.me/${rawPhone}?text=${text}` : `https://wa.me/?text=${text}`;
+      window.open(url, "_blank", "noopener");
+    }
+
+    function selectTenantForPitch(slug) {
+      localStorage.setItem("active_mitra_slug", slug);
+      const t = window.ServiceStore.getTenant(slug);
+      if (t) {
+        window.applyWorkshopTheme(t.themePreset);
+        buildScriptForTenant(t);
+      }
+    }
+
+    function renderPitchDirectory() {
+      const all = window.ServiceStore.getAllTenants();
+      const mount = document.getElementById("pitchTenantsGrid");
+      mount.innerHTML = all.map(t => `
+        <div class="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#18181C]/50 transition-colors">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-sm text-white">${t.name}</span>
+              <span class="font-mono-code text-xs text-[#A09F9A]">?mitra=${t.slug}</span>
+            </div>
+            <div class="text-xs text-[#6E6D68] mt-0.5">${t.branch}</div>
+          </div>
+          <div class="w-full sm:w-auto grid grid-cols-3 sm:flex items-center gap-2">
+            <button type="button" onclick="selectTenantForPitch('${t.slug}')" class="h-9 sm:h-8 px-3 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-white inline-flex items-center justify-center cursor-pointer">Pilih Naskah</button>
+            <a href="index.html?mitra=${encodeURIComponent(t.slug)}" class="h-9 sm:h-8 px-3 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-[#A09F9A] hover:text-white inline-flex items-center justify-center">Web</a>
+            <a href="admin.html?mitra=${encodeURIComponent(t.slug)}" style="background-color: var(--brand);" class="h-9 sm:h-8 px-3 rounded-[8px] text-xs font-bold text-white inline-flex items-center justify-center">Kasir</a>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    document.addEventListener("DOMContentLoaded", initPitchPage);
+  </script>
+</body>
+</html>

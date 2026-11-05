@@ -1,0 +1,2140 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="adminPageTitle">Panel Kasir & Operasional Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="service-config.js"></script>
+  <style>
+    :root {
+      --op-canvas: #0B0B0D;
+      --op-surface: #121215;
+      --op-elevated: #18181C;
+      --op-border: #242429;
+      --op-text: #F3F2EE;
+      --op-muted: #A09F9A;
+      --op-dim: #6E6D68;
+      --brand: #D9381E;
+      --brand-hover: #B82B14;
+      --brand-light: #FF6B52;
+      --brand-fg: #FFFFFF;
+      --font-sans: 'Chivo', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    ::selection {
+      background-color: var(--brand);
+      color: var(--brand-fg);
+    }
+
+    body {
+      background: linear-gradient(180deg, #111114 0%, #0B0B0D 100%);
+      color: var(--op-text);
+      font-family: var(--font-sans);
+      caret-color: #FFFFFF;
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-mono-code {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    :focus-visible {
+      outline: 2px solid #FFFFFF;
+      outline-offset: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0B0D;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2C2C34;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3F3F4A;
+    }
+  </style>
+</head>
+<body class="flex flex-col lg:flex-row min-h-screen">
+
+  <!-- MOBILE SIDEBAR BACKDROP -->
+  <div id="adminSidebarBackdrop" onclick="toggleAdminMobileDrawer(false)" class="fixed inset-0 z-30 bg-black/60 backdrop-blur-xs hidden lg:hidden"></div>
+
+  <!-- LEFT OPERATIONAL RAIL (Off-canvas slide-over drawer on mobile, static rail on lg+) -->
+  <aside id="adminSidebarRail" class="fixed lg:static inset-y-0 left-0 z-40 w-[260px] lg:w-[240px] -translate-x-full lg:translate-x-0 transition-transform duration-200 bg-[#0E0E11] border-r border-[#242429] flex flex-col justify-between shrink-0 overflow-y-auto">
+    <div>
+      <div class="p-4 border-b border-[#242429] flex items-start justify-between gap-3">
+        <div class="flex items-start gap-3 min-w-0">
+          <div id="railLogoBox" class="w-9 h-9 rounded-[10px] bg-[#18181C] border border-[#2E2E36] font-mono-code font-bold text-xs text-white flex items-center justify-center shrink-0 overflow-hidden">
+            KLK
+          </div>
+          <div class="min-w-0">
+            <div id="railStoreName" class="font-bold text-sm text-white leading-snug">KULTUR KICKS LAB</div>
+            <div id="railBranchName" class="text-xs text-[#A09F9A] mt-0.5 leading-snug">Margonda, Depok</div>
+          </div>
+        </div>
+        <button type="button" onclick="toggleAdminMobileDrawer(false)" aria-label="Tutup Menu" class="lg:hidden w-8 h-8 rounded-[8px] bg-[#18181C] border border-[#2E2E36] text-[#A09F9A] hover:text-white flex items-center justify-center shrink-0 cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="p-4 border-b border-[#242429]">
+        <label for="adminTenantSelect" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Mitra Aktif</label>
+        <select
+          id="adminTenantSelect"
+          onchange="switchAdminTenant(this.value)"
+          class="w-full h-9 px-2.5 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-semibold text-white focus:outline-none cursor-pointer"
+        ></select>
+      </div>
+
+      <nav aria-label="Menu Operasional" class="p-3 flex flex-col gap-1.5">
+        <button
+          type="button"
+          id="navBtn-orders"
+          onclick="switchAdminTab('orders')"
+          class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-[10px] text-xs font-semibold transition-colors cursor-pointer w-full text-left bg-[#18181C] text-white border border-[#2E2E36]"
+        >
+          <span>Antrean Nota</span>
+          <span id="navBadgeOrders" class="font-mono-code text-[11px] px-1.5 py-0.5 rounded bg-[#242429] text-[#F3F2EE]">0</span>
+        </button>
+
+        <button
+          type="button"
+          id="navBtn-services"
+          onclick="switchAdminTab('services')"
+          class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-[10px] text-xs font-semibold transition-colors cursor-pointer w-full text-left text-[#A09F9A] hover:text-white hover:bg-[#18181C]/60 border border-transparent"
+        >
+          <span>Daftar Paket</span>
+          <span id="navBadgeServices" class="font-mono-code text-[11px] px-1.5 py-0.5 rounded bg-[#18181C] text-[#A09F9A]">0</span>
+        </button>
+
+        <button
+          type="button"
+          id="navBtn-profile"
+          onclick="switchAdminTab('profile')"
+          class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-[10px] text-xs font-semibold transition-colors cursor-pointer w-full text-left text-[#A09F9A] hover:text-white hover:bg-[#18181C]/60 border border-transparent"
+        >
+          <span>Profil Studio</span>
+        </button>
+
+        <button
+          type="button"
+          id="navBtn-cloner"
+          onclick="switchAdminTab('cloner')"
+          class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-[10px] text-xs font-semibold transition-colors cursor-pointer w-full text-left text-[#A09F9A] hover:text-white hover:bg-[#18181C]/60 border border-transparent"
+        >
+          <span>Duplikat & AI</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="p-4 border-t border-[#242429] space-y-1.5 text-xs">
+      <a id="railPublicLink" href="index.html" class="flex items-center justify-between px-3 py-2 rounded-[10px] bg-[#18181C] hover:bg-[#242429] text-[#F3F2EE] border border-[#2E2E36] font-medium transition-colors">
+        <span>Web Pelanggan</span>
+        <svg class="w-3.5 h-3.5 text-[#A09F9A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+      </a>
+      <a id="railAnalyticsLink" href="analytics.html" class="flex items-center justify-between px-3 py-2 rounded-[10px] hover:bg-[#18181C] text-[#A09F9A] hover:text-white transition-colors">
+        <span>Laporan Omzet</span>
+      </a>
+      <a id="railPitchLink" href="pitch.html" class="flex items-center justify-between px-3 py-2 rounded-[10px] hover:bg-[#18181C] text-[#A09F9A] hover:text-white transition-colors">
+        <span>Pitching B2B</span>
+      </a>
+      <button type="button" onclick="handleResetDemoData()" class="w-full text-left px-3 py-1.5 text-[11px] text-[#6E6D68] hover:text-white transition-colors cursor-pointer">
+        Reset Data Awal
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN WORKBENCH AREA -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="py-3 sm:py-3.5 px-4 sm:px-6 border-b border-[#242429] bg-[#0E0E11]/90 backdrop-blur-md flex items-center justify-between gap-2 sm:gap-3 sticky top-0 z-20">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <button
+          type="button"
+          onclick="toggleAdminMobileDrawer()"
+          aria-label="Buka Menu Navigasi Kasir"
+          class="lg:hidden w-9 h-9 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-white inline-flex items-center justify-center shrink-0 cursor-pointer"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+        <div class="flex flex-wrap items-center gap-2 min-w-0">
+          <h1 id="workspaceHeading" class="text-sm sm:text-lg font-bold tracking-tight text-white leading-tight">
+            Antrean Nota
+          </h1>
+          <span id="workspaceNicheTag" class="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#18181C] border border-[#2E2E36] text-[#A09F9A]">
+            Sneaker Lab
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <a id="topBarPublicBtn" href="index.html" class="h-9 px-2.5 sm:px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-[#F3F2EE] inline-flex items-center gap-1.5 transition-colors">
+          <span>Web Publik</span>
+        </a>
+
+        <button
+          type="button"
+          onclick="openOrderModal()"
+          class="h-9 px-3 sm:px-3.5 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+          <span>Nota Baru</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MOBILE THUMB-FRIENDLY QUICK TAB BAR -->
+    <div class="lg:hidden bg-[#0E0E11] border-b border-[#242429] px-4 py-2 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+      <button type="button" id="mobTabBtn-orders" onclick="switchAdminTab('orders')" class="h-9 px-2.5 rounded-[8px] text-xs font-semibold flex items-center justify-center gap-1.5 bg-[#18181C] text-white border border-[#2E2E36] cursor-pointer">
+        <span>Antrean Nota</span>
+      </button>
+      <button type="button" id="mobTabBtn-services" onclick="switchAdminTab('services')" class="h-9 px-2.5 rounded-[8px] text-xs font-semibold flex items-center justify-center gap-1.5 text-[#A09F9A] bg-[#121215] border border-transparent cursor-pointer">
+        <span>Daftar Paket</span>
+      </button>
+      <button type="button" id="mobTabBtn-profile" onclick="switchAdminTab('profile')" class="h-9 px-2.5 rounded-[8px] text-xs font-semibold flex items-center justify-center gap-1.5 text-[#A09F9A] bg-[#121215] border border-transparent cursor-pointer">
+        <span>Profil Studio</span>
+      </button>
+      <button type="button" id="mobTabBtn-cloner" onclick="switchAdminTab('cloner')" class="h-9 px-2.5 rounded-[8px] text-xs font-semibold flex items-center justify-center gap-1.5 text-[#A09F9A] bg-[#121215] border border-transparent cursor-pointer">
+        <span>Duplikat & AI</span>
+      </button>
+    </div>
+
+    <main class="flex-1 p-4 sm:p-6 max-w-[1400px] w-full mx-auto space-y-6">
+
+      <!-- KPI TELEMETRY STRIP -->
+      <section aria-label="Ringkasan Operasional" class="bg-[#121215] rounded-2xl border border-[#242429] grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[#242429]">
+        <div class="p-4 sm:p-5">
+          <div class="text-xs text-[#A09F9A]">Total Antrean</div>
+          <div id="kpiTotalOrders" class="mt-1.5 font-mono-code text-2xl font-bold text-white">0</div>
+        </div>
+        <div class="p-4 sm:p-5">
+          <div class="text-xs text-[#A09F9A]">Dalam Proses</div>
+          <div id="kpiInProgress" class="mt-1.5 font-mono-code text-2xl font-bold text-white">0</div>
+        </div>
+        <div class="p-4 sm:p-5">
+          <div class="text-xs text-[#A09F9A]">Siap Diambil</div>
+          <div id="kpiReadyOrders" class="mt-1.5 font-mono-code text-2xl font-bold text-white">0</div>
+        </div>
+        <div class="p-4 sm:p-5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs text-[#A09F9A]">Total Transaksi</span>
+            <a id="kpiLinkAnalytics" href="analytics.html" class="text-xs text-[#D4D4D8] hover:text-white underline">Laporan</a>
+          </div>
+          <div id="kpiActiveRevenue" class="mt-1.5 font-mono-code text-xl sm:text-2xl font-bold text-white">Rp 0</div>
+        </div>
+      </section>
+
+      <!-- TAB 1: ORDERS QUEUE & KANBAN -->
+      <section id="tabPanel-orders" class="space-y-4">
+        <div class="bg-[#121215] rounded-2xl border border-[#242429] p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+            <div class="relative flex-1 max-w-sm">
+              <svg class="w-4 h-4 text-[#6E6D68] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input
+                id="orderSearchInput"
+                type="text"
+                placeholder="Cari nota, pelanggan, atau barang..."
+                oninput="renderOrdersWorkspace()"
+                class="w-full h-9 pl-9 pr-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white placeholder:text-[#6E6D68] focus:border-white focus:outline-none"
+              />
+            </div>
+
+            <div id="stageFilterPills" class="flex flex-wrap items-center gap-1.5"></div>
+          </div>
+
+          <div class="flex items-center gap-1 bg-[#18181C] p-1 rounded-[10px] border border-[#2E2E36] self-start lg:self-auto shrink-0">
+            <button
+              type="button"
+              id="viewModeBtn-table"
+              onclick="setOrdersViewMode('table')"
+              class="px-3 py-1 rounded-[8px] text-xs font-semibold transition-colors cursor-pointer bg-[#242429] text-white"
+            >
+              Tabel Kasir
+            </button>
+            <button
+              type="button"
+              id="viewModeBtn-kanban"
+              onclick="setOrdersViewMode('kanban')"
+              class="px-3 py-1 rounded-[8px] text-xs font-semibold transition-colors cursor-pointer text-[#A09F9A] hover:text-white"
+            >
+              Papan Tahap
+            </button>
+          </div>
+        </div>
+
+        <div id="ordersTableView" class="bg-[#121215] rounded-2xl border border-[#242429] overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="hidden md:table-header-group">
+                <tr class="border-b border-[#242429] bg-[#16161A] text-xs font-semibold text-[#A09F9A]">
+                  <th class="py-3 px-4">Nota</th>
+                  <th class="py-3 px-4">Pelanggan</th>
+                  <th class="py-3 px-4">Unit & Paket</th>
+                  <th class="py-3 px-4">Progres (1–5)</th>
+                  <th class="py-3 px-4">Catatan Teknisi</th>
+                  <th class="py-3 px-4 text-right">Biaya</th>
+                  <th class="py-3 px-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody" class="divide-y divide-[#242429] text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="ordersKanbanView" class="hidden grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2.5 items-start"></div>
+      </section>
+
+      <!-- TAB 2: SERVICES CRUD WITH CURATED PHOTO PICKER -->
+      <section id="tabPanel-services" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-8 bg-[#121215] rounded-2xl border border-[#242429] overflow-hidden">
+          <div class="px-5 py-4 border-b border-[#242429] flex items-center justify-between">
+            <h2 class="text-sm font-bold text-white">Daftar Paket Layanan</h2>
+            <span class="text-xs text-[#A09F9A]">Tampil di web pelanggan</span>
+          </div>
+          <div id="adminServicesList" class="divide-y divide-[#242429]"></div>
+        </div>
+
+        <form onsubmit="event.preventDefault(); handleSaveService();" class="lg:col-span-4 bg-[#121215] rounded-2xl border border-[#242429] p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 id="serviceFormHeading" class="text-sm font-bold text-white">Tambah / Edit Paket</h2>
+            <button type="button" onclick="resetServiceForm()" class="text-xs text-[#A09F9A] hover:text-white cursor-pointer">Reset</button>
+          </div>
+          <input type="hidden" id="srvIdInput" />
+
+          <div>
+            <label for="srvNameInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Nama Paket</label>
+            <input id="srvNameInput" type="text" required placeholder="cth: Deep Clean All Material" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white focus:border-white focus:outline-none" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="srvCategoryInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Kategori</label>
+              <input id="srvCategoryInput" type="text" required placeholder="Signature Treatment" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white focus:border-white focus:outline-none" />
+            </div>
+            <div>
+              <label for="srvDurationInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Durasi</label>
+              <input id="srvDurationInput" type="text" required placeholder="2–3 Hari" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-mono-code text-white focus:border-white focus:outline-none" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="srvPriceInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Harga Normal (Rp)</label>
+              <input id="srvPriceInput" type="number" required min="0" placeholder="75000" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-mono-code text-white focus:border-white focus:outline-none" />
+            </div>
+            <div>
+              <label for="srvPromoPriceInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Harga Promo</label>
+              <input id="srvPromoPriceInput" type="number" min="0" placeholder="Opsional" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-mono-code text-white focus:border-white focus:outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label for="srvBadgeInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Label Singkat (Opsional)</label>
+            <input id="srvBadgeInput" type="text" placeholder="cth: Terlaris" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white focus:border-white focus:outline-none" />
+          </div>
+
+          <div>
+            <label for="srvImageInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Foto Paket Layanan (URL / Kamera Asli)</label>
+            <input id="srvImageInput" type="text" placeholder="https://images.unsplash.com/..." class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-mono-code text-white focus:border-white focus:outline-none" />
+            <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <button type="button" onclick="window.openWorkshopPhotoPicker('srvImageInput')" class="h-7 px-2.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-[11px] font-semibold text-white cursor-pointer">
+                Pilih Foto Asli
+              </button>
+              <button type="button" onclick="autoMatchServiceInputPhoto()" class="h-7 px-2.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-[11px] font-semibold text-[#A09F9A] hover:text-white cursor-pointer">
+                Auto-Cocokkan dari Nama
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label for="srvDescInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Deskripsi</label>
+            <textarea id="srvDescInput" rows="2" placeholder="Rincian pengerjaan..." class="w-full p-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white focus:border-white focus:outline-none"></textarea>
+          </div>
+
+          <button type="submit" class="w-full h-10 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white text-xs font-bold transition-colors cursor-pointer">
+            Simpan Paket
+          </button>
+        </form>
+      </section>
+
+      <!-- TAB 3: STORE PROFILE (Includes profServiceMode, profTheme, profLogoImgInput, profHeroImgInput) -->
+      <section id="tabPanel-profile" class="hidden">
+        <form onsubmit="event.preventDefault(); handleSaveProfile();" class="bg-[#121215] rounded-2xl border border-[#242429] p-6 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-[#242429]">
+            <div>
+              <h2 class="text-base font-bold text-white">Profil & Identitas Studio</h2>
+              <p class="text-xs text-[#A09F9A] mt-0.5">Perubahan otomatis tampil di halaman pelanggan dan tiket nota.</p>
+            </div>
+            <button type="submit" class="h-9 px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white text-xs font-bold transition-colors cursor-pointer">
+              Simpan Profil
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label for="profName" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Nama Brand</label>
+              <input id="profName" type="text" required class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-bold text-white" />
+            </div>
+            <div>
+              <label for="profBranch" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Cabang / Area</label>
+              <input id="profBranch" type="text" required class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+            </div>
+            <div>
+              <label for="profNiche" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Kategori Layanan</label>
+              <select id="profNiche" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-semibold text-white">
+                <option value="sneakers_care">Sneakers & Apparel Care</option>
+                <option value="moto_detailing">Motodetailing & Coating</option>
+              </select>
+            </div>
+            <div>
+              <label for="profServiceMode" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Mode Operasional</label>
+              <select id="profServiceMode" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-semibold text-white">
+                <option value="pickup_delivery">Jemput & Antar Kurir</option>
+                <option value="studio_slot">Reservasi Slot Studio</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label for="profTheme" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Aksen Warna Tag Studio</label>
+              <select id="profTheme" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-semibold text-white">
+                <option value="crimson">Obsidian & Signal Vermilion</option>
+                <option value="amber">Obsidian & Signal Amber</option>
+                <option value="volt">Pure Monochrome Steel</option>
+                <option value="cobalt">Obsidian & Precision Cobalt</option>
+                <option value="emerald">Obsidian & Lab Teal</option>
+              </select>
+            </div>
+            <div>
+              <label for="profWhatsapp" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">WhatsApp Admin (628...)</label>
+              <input id="profWhatsapp" type="text" required class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-mono-code text-white" />
+            </div>
+            <div>
+              <label for="profInstagram" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Instagram</label>
+              <input id="profInstagram" type="text" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="profAddress" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Alamat Studio</label>
+              <input id="profAddress" type="text" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+            </div>
+            <div>
+              <label for="profHours" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Jam Operasional</label>
+              <input id="profHours" type="text" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="profHero1" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Headline Baris Pertama</label>
+              <input id="profHero1" type="text" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+            </div>
+            <div>
+              <label for="profHero2" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Headline Baris Kedua</label>
+              <input id="profHero2" type="text" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="profHeroDesc" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Deskripsi Singkat Studio</label>
+              <textarea id="profHeroDesc" rows="2" class="w-full p-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white"></textarea>
+            </div>
+            <div>
+              <label for="profPickupPolicy" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Info Jemput-Antar Kurir</label>
+              <textarea id="profPickupPolicy" rows="2" class="w-full p-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white"></textarea>
+            </div>
+          </div>
+
+          <!-- Optional Visual Assets (Logo & Hero Banner) -->
+          <div class="pt-4 border-t border-[#242429] grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="profLogoImgInput" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">URL Logo Brand (Opsional)</label>
+              <div class="flex gap-2">
+                <input id="profLogoImgInput" type="text" placeholder="Kosongkan untuk inisial teks" class="flex-1 h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-mono-code text-white" />
+                <button type="button" onclick="window.openWorkshopPhotoPicker('profLogoImgInput')" class="h-10 px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-white shrink-0 cursor-pointer">
+                  Pilih Foto
+                </button>
+              </div>
+            </div>
+            <div>
+              <label for="profHeroImgInput" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">URL Foto Banner Hero (Opsional)</label>
+              <div class="flex gap-2">
+                <input id="profHeroImgInput" type="text" placeholder="https://images.unsplash.com/..." class="flex-1 h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-mono-code text-white" />
+                <button type="button" onclick="window.openWorkshopPhotoPicker('profHeroImgInput')" class="h-10 px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-white shrink-0 cursor-pointer">
+                  Pilih Foto Studio
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- TAB 4: B2B PROSPECT CLONER + AI COMMAND CENTER (JSON & GEMINI GENERATOR) -->
+      <section id="tabPanel-cloner" class="hidden space-y-6">
+        
+        <!-- BARIS 1: CLONER INSTAN & DIREKTORI MITRA -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <form onsubmit="event.preventDefault(); handleCloneTenant();" class="lg:col-span-5 bg-[#121215] rounded-2xl border border-[#242429] p-6 space-y-4">
+            <div>
+              <h2 class="text-base font-bold text-white">Duplikat Toko Prospek</h2>
+              <p class="text-xs text-[#A09F9A] mt-1">
+                Buat halaman demo baru dengan nama brand calon klien secara instan.
+              </p>
+            </div>
+
+            <div>
+              <label for="cloneNameInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Nama Toko / Studio Prospek</label>
+              <input id="cloneNameInput" type="text" required placeholder="cth: SneakPeak Care" oninput="autoSlugFromCloneName(this.value)" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="cloneSlugInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Slug URL</label>
+                <input id="cloneSlugInput" type="text" required placeholder="sneakpeak-care" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-mono-code text-white" />
+              </div>
+              <div>
+                <label for="cloneBranchInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Area / Kota</label>
+                <input id="cloneBranchInput" type="text" required placeholder="Tebet, Jaksel" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+              </div>
+            </div>
+
+            <div>
+              <label for="cloneNicheSelect" class="block text-xs font-semibold text-[#A09F9A] mb-1">Jenis Bisnis</label>
+              <select id="cloneNicheSelect" class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-semibold text-white">
+                <option value="sneakers_care">Cuci Sepatu & Tas</option>
+                <option value="moto_detailing">Salon & Detailing Motor</option>
+              </select>
+            </div>
+
+            <button type="submit" class="w-full h-10 rounded-[10px] bg-white hover:bg-[#E4E4E7] text-[#111113] text-xs font-bold transition-colors cursor-pointer">
+              Buat Toko Sekarang
+            </button>
+          </form>
+
+          <div class="lg:col-span-7 bg-[#121215] rounded-2xl border border-[#242429] overflow-hidden">
+            <div class="px-5 py-4 border-b border-[#242429] flex items-center justify-between">
+              <h2 class="text-sm font-bold text-white">Daftar Mitra Aktif</h2>
+              <a href="pitch.html" class="text-xs font-semibold text-[#D4D4D8] hover:text-white underline">Naskah Pitching WA</a>
+            </div>
+            <div id="clonedTenantsList" class="divide-y divide-[#242429]"></div>
+          </div>
+        </div>
+
+        <!-- BARIS 2: AI COMMAND CENTER (SMART JSON IMPORTER & DIRECT GEMINI AI GENERATOR) -->
+        <div id="ws-ai-command-center" class="bg-[#121215] rounded-2xl border border-[#2E2E36] p-6 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#242429]">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-base font-bold text-white">One-Click JSON Importer & Gemini AI Generator</h2>
+                <span class="px-2.5 py-0.5 rounded-full bg-[#18181C] border border-[#2E2E36] text-xs text-[#A09F9A]">Target: <strong id="aiTargetTenantLabel" class="text-white font-mono-code">kultur-kicks</strong></span>
+              </div>
+              <p class="text-xs text-[#A09F9A] mt-1">
+                Isi otomatis profil studio, daftar paket layanan, foto kamera asli, dan 3 sampel nota resi untuk mitra yang sedang dipilih.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onclick="handleAutoMatchAllPhotos()"
+                class="h-9 px-3.5 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white text-xs font-bold cursor-pointer"
+              >
+                Auto-Match Semua Foto Asli
+              </button>
+              <button
+                type="button"
+                onclick="handleExportCurrentTenantJson()"
+                class="h-9 px-3.5 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-white cursor-pointer"
+              >
+                Copy JSON Mitra Ini
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            
+            <!-- KOLOM KIRI: OPSI A — SMART JSON IMPORTER -->
+            <div class="p-4 rounded-xl bg-[#18181C] border border-[#242429] space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">Opsi A: Smart JSON Importer (Riset Chat)</span>
+                <span class="text-[11px] text-[#A09F9A]">Tanpa API Key</span>
+              </div>
+              <p class="text-xs text-[#A09F9A] leading-relaxed">
+                Paste kode JSON hasil riset prospek di bawah ini untuk langsung memperbarui profil, daftar layanan, foto, dan contoh nota.
+              </p>
+              <textarea
+                id="wsJsonImportBox"
+                rows="7"
+                placeholder='Paste JSON di sini... Contoh: { "profile": { "name": "KICKZ LAB STUDIO", ... }, "services": [ ... ], "orders": [ ... ] }'
+                class="w-full p-3 rounded-[10px] bg-[#0E0E11] border border-[#2E2E36] font-mono-code text-[11px] text-white placeholder:text-[#6E6D68] focus:border-white focus:outline-none"
+              ></textarea>
+
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <label class="inline-flex items-center gap-2 text-xs text-[#A09F9A] cursor-pointer select-none">
+                  <input type="checkbox" id="wsJsonReplaceAll" checked class="accent-white rounded cursor-pointer" />
+                  <span>Timpa paket & nota lama di mitra ini</span>
+                </label>
+
+                <button
+                  type="button"
+                  onclick="handleApplyFullTenantJson()"
+                  class="h-9 px-4 rounded-[10px] bg-white hover:bg-[#E4E4E7] text-[#111113] font-bold text-xs transition-colors cursor-pointer"
+                >
+                  Terapkan JSON & Simpan
+                </button>
+              </div>
+            </div>
+
+            <!-- KOLOM KANAN: OPSI B — DIRECT GEMINI AI GENERATOR + FOTO PRICELIST -->
+            <div class="p-4 rounded-xl bg-[#18181C] border border-[#242429] space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">Opsi B: Direct Gemini AI Generator</span>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="text-[11px] text-[#D4D4D8] hover:text-white underline inline-flex items-center gap-1">
+                  <span>Ambil API Key</span>
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+                </a>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <input
+                  type="password"
+                  id="wsGeminiApiKey"
+                  placeholder="Paste Gemini API Key (AIzaSy...)"
+                  class="flex-1 h-9 px-3 rounded-[10px] bg-[#0E0E11] border border-[#2E2E36] font-mono-code text-xs text-white placeholder:text-[#6E6D68] focus:border-white focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onclick="saveWsGeminiKey()"
+                  class="h-9 px-3 rounded-[10px] bg-[#242429] hover:bg-[#2E2E36] text-xs font-semibold text-white shrink-0 cursor-pointer"
+                >
+                  Simpan Key
+                </button>
+              </div>
+
+              <div>
+                <label for="wsGeminiPrompt" class="block text-xs font-semibold text-[#A09F9A] mb-1">
+                  Brief Prospek / Teks Pricelist Mentah:
+                </label>
+                <textarea
+                  id="wsGeminiPrompt"
+                  rows="3"
+                  placeholder="Contoh: KickzCare Beji Depok. Spesialis cuci sepatu & tas kulit, buka 10.00-21.00, gratis jemput min 2 pasang area UI/Margonda. Layanan: Fast Clean 40000 (24 jam), Deep Clean 70000 (2-3 hari), Unyellowing 110000, Repaint Suede 175000..."
+                  class="w-full p-3 rounded-[10px] bg-[#0E0E11] border border-[#2E2E36] text-xs text-white placeholder:text-[#6E6D68] focus:border-white focus:outline-none"
+                ></textarea>
+              </div>
+
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                <label class="inline-flex items-center gap-2 px-3 h-9 rounded-[10px] bg-[#0E0E11] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-[#D4D4D8] cursor-pointer shrink-0">
+                  <span id="wsPricelistImgLabel">Upload Foto Pricelist (Opsional)</span>
+                  <input type="file" id="wsPricelistImgInput" accept="image/jpeg,image/png,image/webp" onchange="handleWsPricelistImage(this)" class="hidden" />
+                </label>
+
+                <button
+                  type="button"
+                  id="btnRunWsGemini"
+                  onclick="runWsGeminiGenerator()"
+                  class="h-9 px-4 rounded-[10px] bg-white hover:bg-[#E4E4E7] text-[#111113] font-bold text-xs transition-colors cursor-pointer"
+                >
+                  <span id="btnRunWsGeminiText">Generate via Gemini AI</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL INPUT / EDIT NOTA -->
+  <div id="orderModal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4">
+    <div class="bg-[#121215] border border-[#2E2E36] rounded-2xl w-full max-w-lg overflow-hidden">
+      <div class="px-5 py-4 border-b border-[#242429] flex items-center justify-between">
+        <h2 id="orderModalTitle" class="text-sm font-bold text-white">Input Nota Baru</h2>
+        <button type="button" onclick="closeOrderModal()" aria-label="Tutup dialog" class="w-8 h-8 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white flex items-center justify-center cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form onsubmit="event.preventDefault(); handleSaveOrderModal();" class="p-5 space-y-4">
+        <input type="hidden" id="ordInternalId" />
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="ordCodeInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Kode Nota</label>
+            <input id="ordCodeInput" type="text" required class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] font-mono-code font-bold text-xs text-white uppercase" />
+          </div>
+          <div>
+            <label for="ordStepSelect" class="block text-xs font-semibold text-[#A09F9A] mb-1">Tahap (1–5)</label>
+            <select id="ordStepSelect" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-semibold text-white"></select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="ordCustomerInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Nama Pelanggan</label>
+            <input id="ordCustomerInput" type="text" required placeholder="Raka Pratama" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+          </div>
+          <div>
+            <label for="ordPhoneInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">No. WhatsApp</label>
+            <input id="ordPhoneInput" type="text" required placeholder="081288990011" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] font-mono-code text-xs text-white" />
+          </div>
+        </div>
+
+        <div>
+          <label for="ordItemInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Unit Barang</label>
+          <input id="ordItemInput" type="text" required placeholder="Salomon XT-6 White Lunar" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="ordServiceSelect" class="block text-xs font-semibold text-[#A09F9A] mb-1">Paket Layanan</label>
+            <select id="ordServiceSelect" onchange="syncModalPriceFromService()" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white"></select>
+          </div>
+          <div>
+            <label for="ordPriceInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Biaya (Rp)</label>
+            <input id="ordPriceInput" type="number" required min="0" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] font-mono-code font-bold text-xs text-white" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="ordDeliverySelect" class="block text-xs font-semibold text-[#A09F9A] mb-1">Serah Terima</label>
+            <select id="ordDeliverySelect" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white">
+              <option value="Drop-Off Studio">Drop-Off Studio</option>
+              <option value="Pick-Up Kurir">Pick-Up Kurir</option>
+              <option value="Towing Pick-Up">Towing Pick-Up</option>
+            </select>
+          </div>
+          <div>
+            <label for="ordEtaInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Estimasi Selesai</label>
+            <input id="ordEtaInput" type="text" required placeholder="Besok · 18:00 WIB" class="w-full h-9 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white" />
+          </div>
+        </div>
+
+        <div>
+          <label for="ordNoteInput" class="block text-xs font-semibold text-[#A09F9A] mb-1">Catatan Teknisi</label>
+          <textarea id="ordNoteInput" rows="2" class="w-full p-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#242429]">
+          <button type="button" onclick="closeOrderModal()" class="h-9 px-4 rounded-[10px] bg-[#18181C] text-xs font-semibold text-[#A09F9A] hover:text-white cursor-pointer">Batal</button>
+          <button type="submit" class="h-9 px-5 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-xs font-bold text-white cursor-pointer">Simpan Nota</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CURATED WORKSHOP PHOTO PICKER MODAL -->
+  <div id="ws-photo-picker-modal" role="dialog" aria-modal="true" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-[#121215] text-[#F3F2EE] border border-[#2E2E36] rounded-2xl overflow-hidden flex flex-col max-h-[88vh]">
+      <div class="p-4 sm:p-5 border-b border-[#242429] flex items-center justify-between gap-3">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white">Pilih Foto Kamera Asli (1-Klik Terapkan)</h3>
+          <p class="text-xs text-[#A09F9A] mt-0.5">Kamus foto layanan cuci sepatu, restorasi, dan detailing motor</p>
+        </div>
+        <button type="button" onclick="closeWorkshopPhotoPicker()" aria-label="Tutup galeri foto" class="w-8 h-8 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-white flex items-center justify-center cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="px-4 sm:px-5 py-3 bg-[#0E0E11] border-b border-[#242429] flex flex-wrap items-center gap-1.5" id="ws-picker-tabs">
+        <button type="button" data-ws-cat="all" class="ws-tab-btn px-3 py-1.5 rounded-[8px] bg-white text-[#111113] font-bold text-xs cursor-pointer">Semua</button>
+        <button type="button" data-ws-cat="snk_wash" class="ws-tab-btn px-3 py-1.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white text-xs font-semibold cursor-pointer">Sneakers Clean</button>
+        <button type="button" data-ws-cat="snk_restore" class="ws-tab-btn px-3 py-1.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white text-xs font-semibold cursor-pointer">Unyellowing & Repaint</button>
+        <button type="button" data-ws-cat="snk_protect" class="ws-tab-btn px-3 py-1.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white text-xs font-semibold cursor-pointer">Coating & Tas</button>
+        <button type="button" data-ws-cat="moto_detail" class="ws-tab-btn px-3 py-1.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white text-xs font-semibold cursor-pointer">Detailing & Poles Motor</button>
+        <button type="button" data-ws-cat="moto_coat" class="ws-tab-btn px-3 py-1.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white text-xs font-semibold cursor-pointer">Nano Ceramic & Moge</button>
+        <button type="button" data-ws-cat="helmet" class="ws-tab-btn px-3 py-1.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white text-xs font-semibold cursor-pointer">Helmet Spa</button>
+        <button type="button" data-ws-cat="studio" class="ws-tab-btn px-3 py-1.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white text-xs font-semibold cursor-pointer">Interior Studio & Bay</button>
+      </div>
+
+      <div id="ws-picker-grid" class="p-4 sm:p-5 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 flex-1"></div>
+    </div>
+  </div>
+
+  <!-- STATUS TOAST -->
+  <div id="adminToast" role="status" aria-live="polite" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#18181C] border border-[#34343C] text-xs font-semibold text-white">
+    <span class="w-2 h-2 rounded-full bg-[var(--brand)]"></span>
+    <span id="adminToastText">Tersimpan</span>
+  </div>
+
+  <script>
+    let activeSlug = window.getActiveMitraSlug();
+    let activeTenant = null;
+    let activeTab = "orders";
+    let ordersViewMode = "table";
+    let activeStageFilter = 0;
+
+    function showToast(msg) {
+      const el = document.getElementById("adminToast");
+      document.getElementById("adminToastText").textContent = msg;
+      el.classList.remove("hidden");
+      el.classList.add("flex");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        el.classList.add("hidden");
+        el.classList.remove("flex");
+      }, 2400);
+    }
+
+    function initAdminWorkbench() {
+      if (window.__wsCurrentRole !== "owner") {
+        localStorage.setItem("ws_super_admin_mode", "true");
+      } else {
+        localStorage.setItem("ws_super_admin_mode", "false");
+      }
+      activeSlug = window.getActiveMitraSlug();
+      activeTenant = window.ServiceStore.getTenant(activeSlug);
+      if (!activeTenant) return;
+
+      window.applyWorkshopTheme(activeTenant.themePreset);
+      renderAdminShell();
+      renderKpiStrip();
+      renderOrdersWorkspace();
+      renderServicesWorkspace();
+      populateProfileForm();
+      renderClonerDirectory();
+    }
+
+    function renderAdminShell() {
+      const nicheDef = window.NICHE_DEFINITIONS[activeTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const initials = activeTenant.name.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "LAB";
+
+      document.getElementById("adminPageTitle").textContent = `Kasir · ${activeTenant.name}`;
+      const logoBox = document.getElementById("railLogoBox");
+      if (activeTenant.logoUrl) {
+        logoBox.innerHTML = `<img src="${activeTenant.logoUrl}" alt="${activeTenant.name}" class="w-full h-full object-cover" onerror="this.parentElement.textContent='${initials}'" />`;
+      } else {
+        logoBox.textContent = initials;
+      }
+
+      document.getElementById("railStoreName").textContent = activeTenant.name;
+      document.getElementById("railBranchName").textContent = activeTenant.branch;
+      document.getElementById("workspaceNicheTag").textContent = nicheDef.shortLabel;
+
+      const aiLbl = document.getElementById("aiTargetTenantLabel");
+      if (aiLbl) aiLbl.textContent = activeTenant.slug;
+
+      const all = window.ServiceStore.getAllTenants();
+      const sel = document.getElementById("adminTenantSelect");
+      sel.innerHTML = all.map(t => `<option value="${t.slug}" ${t.slug === activeTenant.slug ? "selected" : ""}>${t.name} (${t.branch})</option>`).join("");
+
+      const q = `?mitra=${encodeURIComponent(activeTenant.slug)}`;
+      document.getElementById("railPublicLink").href = `index.html${q}`;
+      document.getElementById("topBarPublicBtn").href = `index.html${q}`;
+      document.getElementById("railAnalyticsLink").href = `analytics.html${q}`;
+      document.getElementById("kpiLinkAnalytics").href = `analytics.html${q}`;
+      document.getElementById("railPitchLink").href = `pitch.html${q}`;
+
+      document.getElementById("navBadgeOrders").textContent = (activeTenant.orders || []).length;
+      document.getElementById("navBadgeServices").textContent = (activeTenant.services || []).length;
+    }
+
+    function toggleAdminMobileDrawer(forceOpen) {
+      const rail = document.getElementById("adminSidebarRail");
+      const backdrop = document.getElementById("adminSidebarBackdrop");
+      if (!rail || !backdrop) return;
+      const isClosed = rail.classList.contains("-translate-x-full");
+      const shouldOpen = typeof forceOpen === "boolean" ? forceOpen : isClosed;
+      if (shouldOpen) {
+        rail.classList.remove("-translate-x-full");
+        backdrop.classList.remove("hidden");
+      } else {
+        rail.classList.add("-translate-x-full");
+        backdrop.classList.add("hidden");
+      }
+    }
+
+    function switchAdminTenant(newSlug) {
+      localStorage.setItem("active_mitra_slug", newSlug);
+      const url = new URL(window.location.href);
+      url.searchParams.set("mitra", newSlug);
+      window.history.replaceState({}, "", url.toString());
+      toggleAdminMobileDrawer(false);
+      initAdminWorkbench();
+      showToast(`Mitra aktif: ${newSlug}`);
+    }
+
+    function switchAdminTab(tabId) {
+      activeTab = tabId;
+      toggleAdminMobileDrawer(false);
+      const tabs = ["orders", "services", "profile", "cloner"];
+      const titles = {
+        orders: "Antrean Nota",
+        services: "Daftar Paket Layanan",
+        profile: "Profil Studio",
+        cloner: "Duplikat Toko & AI Command Center"
+      };
+      document.getElementById("workspaceHeading").textContent = titles[tabId] || titles.orders;
+
+      tabs.forEach(t => {
+        const panel = document.getElementById(`tabPanel-${t}`);
+        const btn = document.getElementById(`navBtn-${t}`);
+        const mobBtn = document.getElementById(`mobTabBtn-${t}`);
+        if (t === tabId) {
+          panel.classList.remove("hidden");
+          btn.className = "flex items-center justify-between gap-2 px-3 py-2.5 rounded-[10px] text-xs font-semibold transition-colors cursor-pointer w-full text-left bg-[#18181C] text-white border border-[#2E2E36]";
+          if (mobBtn) mobBtn.className = "h-9 px-2.5 rounded-[8px] text-xs font-semibold flex items-center justify-center gap-1.5 bg-[#18181C] text-white border border-[#2E2E36] cursor-pointer";
+        } else {
+          panel.classList.add("hidden");
+          btn.className = "flex items-center justify-between gap-2 px-3 py-2.5 rounded-[10px] text-xs font-semibold transition-colors cursor-pointer w-full text-left text-[#A09F9A] hover:text-white hover:bg-[#18181C]/60 border border-transparent";
+          if (mobBtn) mobBtn.className = "h-9 px-2.5 rounded-[8px] text-xs font-semibold flex items-center justify-center gap-1.5 text-[#A09F9A] bg-[#121215] border border-transparent cursor-pointer";
+        }
+      });
+    }
+
+    function renderKpiStrip() {
+      const orders = activeTenant.orders || [];
+      const inProgress = orders.filter(o => Number(o.stepIndex) < 5).length;
+      const ready = orders.filter(o => Number(o.stepIndex) === 5).length;
+      const totalRev = orders.reduce((acc, o) => acc + (Number(o.price) || 0), 0);
+
+      document.getElementById("kpiTotalOrders").textContent = orders.length;
+      document.getElementById("kpiInProgress").textContent = inProgress;
+      document.getElementById("kpiReadyOrders").textContent = ready;
+      document.getElementById("kpiActiveRevenue").textContent = window.formatRupiah(totalRev);
+    }
+
+    function setStageFilter(stageNum) {
+      activeStageFilter = stageNum;
+      renderOrdersWorkspace();
+    }
+
+    function setOrdersViewMode(mode) {
+      ordersViewMode = mode;
+      const tableEl = document.getElementById("ordersTableView");
+      const kanbanEl = document.getElementById("ordersKanbanView");
+      const btnTable = document.getElementById("viewModeBtn-table");
+      const btnKanban = document.getElementById("viewModeBtn-kanban");
+
+      if (mode === "kanban") {
+        tableEl.classList.add("hidden");
+        kanbanEl.classList.remove("hidden");
+        btnKanban.className = "px-3 py-1 rounded-[8px] text-xs font-semibold transition-colors cursor-pointer bg-[#242429] text-white";
+        btnTable.className = "px-3 py-1 rounded-[8px] text-xs font-semibold transition-colors cursor-pointer text-[#A09F9A] hover:text-white";
+      } else {
+        kanbanEl.classList.add("hidden");
+        tableEl.classList.remove("hidden");
+        btnTable.className = "px-3 py-1 rounded-[8px] text-xs font-semibold transition-colors cursor-pointer bg-[#242429] text-white";
+        btnKanban.className = "px-3 py-1 rounded-[8px] text-xs font-semibold transition-colors cursor-pointer text-[#A09F9A] hover:text-white";
+      }
+      renderOrdersWorkspace();
+    }
+
+    function renderOrdersWorkspace() {
+      const nicheDef = window.NICHE_DEFINITIONS[activeTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const steps = nicheDef.steps;
+      const orders = activeTenant.orders || [];
+
+      const filterMount = document.getElementById("stageFilterPills");
+      let pillsHtml = `
+        <button type="button" onclick="setStageFilter(0)" class="px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer ${
+          activeStageFilter === 0 ? "bg-white text-[#111113]" : "bg-[#18181C] text-[#A09F9A] hover:text-white border border-[#2E2E36]"
+        }">Semua (${orders.length})</button>
+      `;
+      steps.forEach(s => {
+        const count = orders.filter(o => Number(o.stepIndex) === s.step).length;
+        const active = activeStageFilter === s.step;
+        pillsHtml += `
+          <button type="button" onclick="setStageFilter(${s.step})" class="px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer ${
+            active ? "bg-[var(--brand)] text-white" : "bg-[#18181C] text-[#A09F9A] hover:text-white border border-[#2E2E36]"
+          }">Tahap ${s.step} (${count})</button>
+        `;
+      });
+      filterMount.innerHTML = pillsHtml;
+
+      const q = (document.getElementById("orderSearchInput").value || "").trim().toLowerCase();
+      const filtered = orders.filter(o => {
+        const matchStage = activeStageFilter === 0 || Number(o.stepIndex) === activeStageFilter;
+        const matchQuery = !q ||
+          o.orderId.toLowerCase().includes(q) ||
+          o.customerName.toLowerCase().includes(q) ||
+          o.itemName.toLowerCase().includes(q) ||
+          o.serviceName.toLowerCase().includes(q) ||
+          (o.phone || "").includes(q);
+        return matchStage && matchQuery;
+      });
+
+      const tbody = document.getElementById("ordersTableBody");
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-10 text-center text-xs text-[#6E6D68]">
+              Tidak ada nota yang sesuai dengan filter pencarian.
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = filtered.map(ord => {
+          const curStep = Math.min(Math.max(Number(ord.stepIndex) || 1, 1), 5);
+          const stepMeta = steps[curStep - 1] || steps[0];
+
+          const stageButtons = steps.map(s => {
+            const isCurrent = s.step === curStep;
+            const isDoneStep = s.step < curStep;
+            let btnCls = "bg-[#141417] text-[#6E6D68] border-[#222228] hover:text-white";
+            if (isDoneStep) btnCls = "bg-[#1E1E24] text-[#D4D4D8] border-[#34343C]";
+            if (isCurrent) btnCls = "bg-[var(--brand)] text-white border-[var(--brand)] font-bold";
+
+            return `
+              <button
+                type="button"
+                title="Tahap ${s.step}: ${s.label}"
+                onclick="handleQuickStepChange('${ord.orderId}', ${s.step})"
+                class="w-9 h-9 md:w-7 md:h-7 rounded-[8px] border font-mono-code text-xs transition-colors cursor-pointer ${btnCls}"
+              >${s.step}</button>
+            `;
+          }).join("");
+
+          const notaLink = `nota.html?mitra=${encodeURIComponent(activeTenant.slug)}&order=${encodeURIComponent(ord.orderId)}`;
+
+          return `
+            <tr class="block md:table-row p-4 md:p-0 space-y-3 md:space-y-0 hover:bg-[#18181C]/50 transition-colors align-top">
+              <td class="block md:table-cell p-0 md:py-3.5 md:px-4 md:whitespace-nowrap">
+                <div class="flex items-center justify-between md:block gap-2">
+                  <div class=" flex items-center gap-2 md:block">
+                    <span class="font-mono-code font-bold text-white text-sm md:text-xs">${ord.orderId}</span>
+                    <span class="px-2 py-0.5 md:p-0 rounded-full bg-[#18181C] md:bg-transparent border border-[#2E2E36] md:border-0 text-[11px] text-[#A09F9A] md:text-[#6E6D68] md:block md:mt-0.5">${ord.etaDate}</span>
+                  </div>
+                  <span class="md:hidden font-mono-code font-bold text-sm text-white">${window.formatRupiah(ord.price)}</span>
+                </div>
+              </td>
+              <td class="block md:table-cell p-0 md:py-3.5 md:px-4">
+                <div class="flex items-center justify-between md:block gap-2">
+                  <div class="font-semibold text-white leading-snug">${ord.customerName}</div>
+                  <div class="font-mono-code text-[11px] text-[#A09F9A] md:mt-0.5">${ord.phone}</div>
+                </div>
+              </td>
+              <td class="block md:table-cell p-0 md:py-3.5 md:px-4 md:min-w-[180px]">
+                <div class="font-semibold text-white leading-snug">${ord.itemName}</div>
+                <div class="text-[11px] text-[#A09F9A] mt-0.5 leading-snug">${ord.serviceName} · ${ord.deliveryType}</div>
+              </td>
+              <td class="block md:table-cell p-0 md:py-3.5 md:px-4 md:whitespace-nowrap">
+                <div class="flex items-center justify-between md:block gap-2">
+                  <div class="flex items-center gap-1.5 md:gap-1">${stageButtons}</div>
+                  <div class="text-[11px] md:mt-1 font-medium text-[#D4D4D8] text-right md:text-left">
+                    ${stepMeta.label}
+                  </div>
+                </div>
+              </td>
+              <td class="block md:table-cell p-0 md:py-3.5 md:px-4 md:min-w-[230px]">
+                <textarea
+                  rows="2"
+                  aria-label="Catatan teknisi untuk ${ord.orderId}"
+                  onchange="handleInlineNoteSave('${ord.orderId}', this.value)"
+                  class="w-full p-2 rounded-[8px] bg-[#18181C] border border-[#242429] hover:border-[#34343C] focus:border-white text-xs text-[#F3F2EE] leading-relaxed focus:outline-none transition-colors resize-none"
+                >${ord.techNote || ""}</textarea>
+              </td>
+              <td class="hidden md:table-cell py-3.5 px-4 text-right whitespace-nowrap font-mono-code font-bold text-white">
+                ${window.formatRupiah(ord.price)}
+              </td>
+              <td class="block md:table-cell p-0 pt-1 md:pt-3.5 md:py-3.5 md:px-4 md:text-right md:whitespace-nowrap">
+                <div class="flex md:inline-flex items-center gap-1.5 md:gap-1 w-full md:w-auto">
+                  <button
+                    type="button"
+                    onclick="sendOrderWhatsApp('${ord.orderId}')"
+                    title="Kirim progres via WhatsApp"
+                    class="flex-1 md:flex-initial h-9 md:h-7 px-2.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-white border border-[#2E2E36] text-xs md:text-[11px] font-semibold inline-flex items-center justify-center cursor-pointer"
+                  >WA</button>
+                  <a
+                    href="${notaLink}"
+                    title="Buka & Cetak Nota QR"
+                    class="flex-1 md:flex-initial h-9 md:h-7 px-2.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#D4D4D8] hover:text-white border border-[#2E2E36] text-xs md:text-[11px] font-semibold inline-flex items-center justify-center"
+                  >Nota</a>
+                  <button
+                    type="button"
+                    onclick="openOrderModal('${ord.orderId}')"
+                    title="Edit Nota"
+                    class="flex-1 md:flex-initial h-9 md:h-7 px-2 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white border border-[#2E2E36] text-xs md:text-[11px] inline-flex items-center justify-center cursor-pointer"
+                  >Edit</button>
+                  <button
+                    type="button"
+                    onclick="handleDeleteOrder('${ord.orderId}')"
+                    title="Hapus Nota"
+                    aria-label="Hapus Nota ${ord.orderId}"
+                    class="h-9 w-9 md:h-7 md:w-7 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#6E6D68] hover:text-white border border-[#2E2E36] inline-flex items-center justify-center shrink-0 cursor-pointer"
+                  >
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      const kanbanMount = document.getElementById("ordersKanbanView");
+      kanbanMount.innerHTML = steps.map(s => {
+        const colOrders = filtered.filter(o => Number(o.stepIndex) === s.step);
+        const cardsHtml = colOrders.length === 0
+          ? `<div class="h-[224px] p-4 flex items-center justify-center text-center text-[11px] text-[#6E6D68] border border-dashed border-[#242429] rounded-xl">Kosong</div>`
+          : colOrders.map(o => `
+              <div class="p-2.5 rounded-xl bg-[#18181C] border border-[#2E2E36] flex flex-col justify-between gap-2 min-w-0">
+                <div class="flex flex-wrap items-center justify-between gap-x-1.5 gap-y-0.5 pb-1.5 border-b border-[#242429]">
+                  <span class="font-mono-code font-bold text-[11px] text-white whitespace-nowrap">${o.orderId}</span>
+                  <span class="font-mono-code text-[11px] font-bold text-[#F3F2EE] whitespace-nowrap">${window.formatRupiah(o.price)}</span>
+                </div>
+                <div class="min-h-[66px] flex flex-col justify-start">
+                  <div class="font-bold text-xs text-white leading-snug break-words">${o.itemName}</div>
+                  <div class="text-[11px] text-[#A09F9A] mt-0.5 leading-snug break-words">${o.customerName}</div>
+                </div>
+                <textarea
+                  rows="2"
+                  aria-label="Catatan teknisi untuk ${o.orderId}"
+                  onchange="handleInlineNoteSave('${o.orderId}', this.value)"
+                  class="w-full p-2 rounded-[8px] bg-[#121215] border border-[#242429] hover:border-[#34343C] focus:border-white text-[11px] text-[#F3F2EE] leading-snug focus:outline-none transition-colors resize-none"
+                >${o.techNote || s.defaultNote}</textarea>
+                <div class="grid grid-cols-2 gap-1.5 pt-0.5">
+                  <button
+                    type="button"
+                    onclick="handleQuickStepChange('${o.orderId}', ${Math.max(1, s.step - 1)})"
+                    ${s.step === 1 ? "disabled" : ""}
+                    class="w-full min-w-0 h-7 px-1.5 rounded-[6px] bg-[#121215] border border-[#2E2E36] text-[11px] font-semibold text-[#A09F9A] hover:text-white disabled:opacity-30 cursor-pointer inline-flex items-center justify-center"
+                  >Mundur</button>
+                  <button
+                    type="button"
+                    onclick="handleQuickStepChange('${o.orderId}', ${Math.min(5, s.step + 1)})"
+                    ${s.step === 5 ? "disabled" : ""}
+                    class="w-full min-w-0 h-7 px-1.5 rounded-[6px] bg-[var(--brand)] text-[11px] font-bold text-white hover:opacity-90 disabled:opacity-30 cursor-pointer inline-flex items-center justify-center"
+                  >Lanjut</button>
+                </div>
+              </div>
+            `).join("");
+
+        return `
+          <div class="bg-[#121215] rounded-2xl border border-[#242429] p-2.5 flex flex-col gap-2.5 min-w-0">
+            <div class="min-h-[40px] flex items-center justify-between gap-1.5 pb-2 border-b border-[#242429]">
+              <h3 class="text-xs font-bold text-white leading-snug">${s.step}. ${s.label}</h3>
+              <span class="font-mono-code text-[11px] px-2 py-0.5 rounded-full bg-[#18181C] border border-[#2E2E36] text-white shrink-0">${colOrders.length}</span>
+            </div>
+            <div class="space-y-2.5">${cardsHtml}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function handleQuickStepChange(orderId, nextStep) {
+      const nicheDef = window.NICHE_DEFINITIONS[activeTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const stepMeta = nicheDef.steps[nextStep - 1] || nicheDef.steps[0];
+      window.ServiceStore.updateOrderStep(activeTenant.slug, orderId, nextStep, stepMeta.defaultNote);
+      activeTenant = window.ServiceStore.getTenant(activeTenant.slug);
+      renderKpiStrip();
+      renderOrdersWorkspace();
+      showToast(`Nota ${orderId} digeser ke Tahap ${nextStep} (${stepMeta.label})`);
+    }
+
+    function handleInlineNoteSave(orderId, newNote) {
+      window.ServiceStore.updateOrderNote(activeTenant.slug, orderId, newNote);
+      activeTenant = window.ServiceStore.getTenant(activeTenant.slug);
+      showToast(`Catatan teknisi ${orderId} diperbarui`);
+    }
+
+    function sendOrderWhatsApp(orderId) {
+      const ord = (activeTenant.orders || []).find(o => o.orderId === orderId);
+      if (!ord) return;
+      const nicheDef = window.NICHE_DEFINITIONS[activeTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+      const stepMeta = nicheDef.steps[(Number(ord.stepIndex) || 1) - 1] || nicheDef.steps[0];
+      const trackUrl = `${window.location.origin}${window.location.pathname.replace("admin.html", "index.html")}?mitra=${activeTenant.slug}&resi=${ord.orderId}`;
+
+      const msg =
+        `Halo Kak *${ord.customerName}*, update progres dari *${activeTenant.name}*:\n\n` +
+        `• No. Nota: *${ord.orderId}*\n` +
+        `• Unit: *${ord.itemName}*\n` +
+        `• Status Saat Ini: *Tahap ${ord.stepIndex}/5 — ${stepMeta.label}*\n` +
+        `• Catatan Teknisi: _"${ord.techNote}"_\n` +
+        `• Estimasi Selesai: *${ord.etaDate}*\n\n` +
+        `Lacak live tanpa antre chat di: ${trackUrl}`;
+
+      const cleanPhone = ord.phone.replace(/[^0-9]/g, "").replace(/^0/, "62");
+      window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
+    }
+
+    function openOrderModal(orderId) {
+      const modal = document.getElementById("orderModal");
+      const nicheDef = window.NICHE_DEFINITIONS[activeTenant.niche] || window.NICHE_DEFINITIONS.sneakers_care;
+
+      const stepSel = document.getElementById("ordStepSelect");
+      stepSel.innerHTML = nicheDef.steps.map(s => `<option value="${s.step}">Tahap ${s.step} — ${s.label}</option>`).join("");
+
+      const srvSel = document.getElementById("ordServiceSelect");
+      srvSel.innerHTML = (activeTenant.services || []).map(s => {
+        const p = s.isPromo && s.promoPrice ? s.promoPrice : s.price;
+        return `<option value="${s.name}" data-price="${p}">${s.name} (${window.formatRupiah(p)})</option>`;
+      }).join("");
+
+      const existing = orderId ? (activeTenant.orders || []).find(o => o.orderId === orderId) : null;
+      if (existing) {
+        document.getElementById("orderModalTitle").textContent = `Edit Nota ${existing.orderId}`;
+        document.getElementById("ordInternalId").value = existing.id;
+        document.getElementById("ordCodeInput").value = existing.orderId;
+        document.getElementById("ordStepSelect").value = existing.stepIndex;
+        document.getElementById("ordCustomerInput").value = existing.customerName;
+        document.getElementById("ordPhoneInput").value = existing.phone;
+        document.getElementById("ordItemInput").value = existing.itemName;
+        document.getElementById("ordServiceSelect").value = existing.serviceName;
+        document.getElementById("ordPriceInput").value = existing.price;
+        document.getElementById("ordDeliverySelect").value = existing.deliveryType;
+        document.getElementById("ordEtaInput").value = existing.etaDate;
+        document.getElementById("ordNoteInput").value = existing.techNote;
+      } else {
+        const prefix = activeTenant.name.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "ORD";
+        const nextNum = 2601 + (activeTenant.orders ? activeTenant.orders.length : 0);
+        document.getElementById("orderModalTitle").textContent = "Input Nota Baru";
+        document.getElementById("ordInternalId").value = "";
+        document.getElementById("ordCodeInput").value = `${prefix}-${nextNum}`;
+        document.getElementById("ordStepSelect").value = "1";
+        document.getElementById("ordCustomerInput").value = "";
+        document.getElementById("ordPhoneInput").value = "";
+        document.getElementById("ordItemInput").value = "";
+        syncModalPriceFromService();
+        document.getElementById("ordDeliverySelect").value = "Drop-Off Studio";
+        document.getElementById("ordEtaInput").value = "2–3 Hari";
+        document.getElementById("ordNoteInput").value = nicheDef.steps[0].defaultNote;
+      }
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      document.getElementById("ordCustomerInput").focus();
+    }
+
+    function syncModalPriceFromService() {
+      const sel = document.getElementById("ordServiceSelect");
+      const opt = sel.options[sel.selectedIndex];
+      if (opt && opt.dataset.price) {
+        document.getElementById("ordPriceInput").value = opt.dataset.price;
+      }
+    }
+
+    function closeOrderModal() {
+      const modal = document.getElementById("orderModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function handleSaveOrderModal() {
+      const payload = {
+        id: document.getElementById("ordInternalId").value || undefined,
+        orderId: document.getElementById("ordCodeInput").value.trim().toUpperCase(),
+        stepIndex: Number(document.getElementById("ordStepSelect").value) || 1,
+        customerName: document.getElementById("ordCustomerInput").value.trim(),
+        phone: document.getElementById("ordPhoneInput").value.trim(),
+        itemName: document.getElementById("ordItemInput").value.trim(),
+        serviceName: document.getElementById("ordServiceSelect").value,
+        price: Number(document.getElementById("ordPriceInput").value) || 0,
+        deliveryType: document.getElementById("ordDeliverySelect").value,
+        etaDate: document.getElementById("ordEtaInput").value.trim(),
+        techNote: document.getElementById("ordNoteInput").value.trim()
+      };
+      window.ServiceStore.upsertOrder(activeTenant.slug, payload);
+      closeOrderModal();
+      initAdminWorkbench();
+      showToast(`Nota ${payload.orderId} disimpan`);
+    }
+
+    function handleDeleteOrder(orderId) {
+      window.ServiceStore.deleteOrder(activeTenant.slug, orderId);
+      initAdminWorkbench();
+      showToast(`Nota ${orderId} dihapus`);
+    }
+
+    function renderServicesWorkspace() {
+      const list = document.getElementById("adminServicesList");
+      const services = activeTenant.services || [];
+      list.innerHTML = services.map((s, idx) => {
+        const finalPrice = s.isPromo && s.promoPrice ? s.promoPrice : s.price;
+        const thumbUrl = s.imageUrl || window.resolveWorkshopServiceImage(s.name, s.category, activeTenant.niche, idx);
+        return `
+          <div class="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 hover:bg-[#18181C]/50 transition-colors">
+            <div class="flex items-start gap-3.5 flex-1 min-w-[220px]">
+              <img src="${thumbUrl}" alt="${s.name}" class="w-12 h-12 rounded-[10px] object-cover bg-[#18181C] border border-[#2E2E36] shrink-0" />
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-bold text-sm text-white">${s.name}</span>
+                  <span class="text-[11px] px-2 py-0.5 rounded bg-[#18181C] border border-[#2E2E36] text-[#A09F9A]">${s.category}</span>
+                  <span class="font-mono-code text-[11px] text-[#A09F9A]">${s.duration}</span>
+                </div>
+                <p class="text-xs text-[#A09F9A] mt-1 leading-relaxed">${s.desc || "-"}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <div class="text-right">
+                <div class="font-mono-code text-sm font-bold text-white">${window.formatRupiah(finalPrice)}</div>
+                ${s.isPromo && s.promoPrice ? `<div class="font-mono-code text-[11px] text-[#6E6D68] line-through">${window.formatRupiah(s.price)}</div>` : ""}
+              </div>
+              <button type="button" onclick="editServiceRow('${s.id}')" class="h-8 px-3 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs text-white cursor-pointer">Edit</button>
+              <button type="button" onclick="deleteServiceRow('${s.id}')" aria-label="Hapus layanan ${s.name}" class="h-8 w-8 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-[#6E6D68] hover:text-white flex items-center justify-center cursor-pointer">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function autoMatchServiceInputPhoto() {
+      const nameVal = document.getElementById("srvNameInput").value || "";
+      const catVal = document.getElementById("srvCategoryInput").value || "";
+      const nicheVal = (activeTenant && activeTenant.niche) || "sneakers_care";
+      document.getElementById("srvImageInput").value = window.resolveWorkshopServiceImage(
+        nameVal,
+        catVal,
+        nicheVal,
+        Math.floor(Math.random() * 3)
+      );
+      showToast("Foto otomatis dicocokkan dari nama paket");
+    }
+
+    function editServiceRow(srvId) {
+      const s = (activeTenant.services || []).find(x => x.id === srvId);
+      if (!s) return;
+      document.getElementById("serviceFormHeading").textContent = "Edit Paket";
+      document.getElementById("srvIdInput").value = s.id;
+      document.getElementById("srvNameInput").value = s.name;
+      document.getElementById("srvCategoryInput").value = s.category || "Treatment";
+      document.getElementById("srvDurationInput").value = s.duration || "2–3 Hari";
+      document.getElementById("srvPriceInput").value = s.price;
+      document.getElementById("srvPromoPriceInput").value = s.promoPrice || "";
+      document.getElementById("srvBadgeInput").value = s.badge || "";
+      document.getElementById("srvImageInput").value = s.imageUrl || "";
+      document.getElementById("srvDescInput").value = s.desc || "";
+    }
+
+    function resetServiceForm() {
+      document.getElementById("serviceFormHeading").textContent = "Tambah Paket";
+      document.getElementById("srvIdInput").value = "";
+      document.getElementById("srvNameInput").value = "";
+      document.getElementById("srvCategoryInput").value = "Signature Treatment";
+      document.getElementById("srvDurationInput").value = "2–3 Hari";
+      document.getElementById("srvPriceInput").value = "";
+      document.getElementById("srvPromoPriceInput").value = "";
+      document.getElementById("srvBadgeInput").value = "";
+      document.getElementById("srvImageInput").value = "";
+      document.getElementById("srvDescInput").value = "";
+    }
+
+    function handleSaveService() {
+      const nameVal = document.getElementById("srvNameInput").value.trim();
+      const catVal = document.getElementById("srvCategoryInput").value.trim();
+      const promoVal = Number(document.getElementById("srvPromoPriceInput").value) || null;
+      const chosenImg =
+        document.getElementById("srvImageInput").value.trim() ||
+        window.resolveWorkshopServiceImage(nameVal, catVal, activeTenant.niche, (activeTenant.services || []).length);
+
+      const payload = {
+        id: document.getElementById("srvIdInput").value || undefined,
+        name: nameVal,
+        category: catVal,
+        duration: document.getElementById("srvDurationInput").value.trim(),
+        price: Number(document.getElementById("srvPriceInput").value) || 50000,
+        promoPrice: promoVal,
+        isPromo: Boolean(promoVal),
+        badge: document.getElementById("srvBadgeInput").value.trim(),
+        imageUrl: chosenImg,
+        desc: document.getElementById("srvDescInput").value.trim(),
+        available: true
+      };
+      window.ServiceStore.upsertService(activeTenant.slug, payload);
+      resetServiceForm();
+      initAdminWorkbench();
+      showToast(`Paket "${payload.name}" disimpan`);
+    }
+
+    function deleteServiceRow(srvId) {
+      window.ServiceStore.deleteService(activeTenant.slug, srvId);
+      initAdminWorkbench();
+      showToast("Paket dihapus");
+    }
+
+    function populateProfileForm() {
+      document.getElementById("profName").value = activeTenant.name || "";
+      document.getElementById("profBranch").value = activeTenant.branch || "";
+      document.getElementById("profNiche").value = activeTenant.niche || "sneakers_care";
+      document.getElementById("profServiceMode").value = activeTenant.serviceMode || "pickup_delivery";
+      document.getElementById("profTheme").value = activeTenant.themePreset || "crimson";
+      document.getElementById("profWhatsapp").value = activeTenant.whatsapp || "";
+      document.getElementById("profInstagram").value = activeTenant.instagram || "";
+      document.getElementById("profAddress").value = activeTenant.address || "";
+      document.getElementById("profHours").value = activeTenant.hours || "";
+      document.getElementById("profHero1").value = activeTenant.heroHeadline1 || "";
+      document.getElementById("profHero2").value = activeTenant.heroHeadline2 || "";
+      document.getElementById("profHeroDesc").value = activeTenant.heroDesc || "";
+      document.getElementById("profPickupPolicy").value = activeTenant.pickupPolicy || "";
+      document.getElementById("profLogoImgInput").value = activeTenant.logoUrl || "";
+      document.getElementById("profHeroImgInput").value = activeTenant.heroImageUrl || "";
+    }
+
+    function handleSaveProfile() {
+      const updated = {
+        name: document.getElementById("profName").value.trim().toUpperCase(),
+        branch: document.getElementById("profBranch").value.trim(),
+        niche: document.getElementById("profNiche").value,
+        serviceMode: document.getElementById("profServiceMode").value,
+        themePreset: document.getElementById("profTheme").value,
+        whatsapp: document.getElementById("profWhatsapp").value.trim(),
+        instagram: document.getElementById("profInstagram").value.trim(),
+        address: document.getElementById("profAddress").value.trim(),
+        hours: document.getElementById("profHours").value.trim(),
+        heroHeadline1: document.getElementById("profHero1").value.trim(),
+        heroHeadline2: document.getElementById("profHero2").value.trim(),
+        heroDesc: document.getElementById("profHeroDesc").value.trim(),
+        pickupPolicy: document.getElementById("profPickupPolicy").value.trim(),
+        logoUrl: document.getElementById("profLogoImgInput").value.trim(),
+        heroImageUrl: document.getElementById("profHeroImgInput").value.trim()
+      };
+      window.ServiceStore.saveTenantProfile(activeTenant.slug, updated);
+      initAdminWorkbench();
+      showToast("Profil & warna tema studio disimpan");
+    }
+
+    function autoSlugFromCloneName(val) {
+      document.getElementById("cloneSlugInput").value = val
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+
+    function handleCloneTenant() {
+      const name = document.getElementById("cloneNameInput").value.trim();
+      const slug = document.getElementById("cloneSlugInput").value.trim().toLowerCase();
+      const branch = document.getElementById("cloneBranchInput").value.trim();
+      const niche = document.getElementById("cloneNicheSelect").value;
+      if (!name || !slug) return;
+
+      window.ServiceStore.duplicateTenant(activeTenant.slug, slug, name, branch, niche);
+      document.getElementById("cloneNameInput").value = "";
+      document.getElementById("cloneSlugInput").value = "";
+      document.getElementById("cloneBranchInput").value = "";
+      switchAdminTenant(slug);
+      showToast(`Toko "${name}" berhasil dibuat`);
+    }
+
+    function renderClonerDirectory() {
+      const all = window.ServiceStore.getAllTenants();
+      const mount = document.getElementById("clonedTenantsList");
+      mount.innerHTML = all.map(t => {
+        const isDefault = t.slug === "kultur-kicks" || t.slug === "apex-motoworks";
+        return `
+          <div class="p-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-bold text-sm text-white">${t.name}</span>
+                <span class="font-mono-code text-xs text-[#A09F9A]">?mitra=${t.slug}</span>
+              </div>
+              <div class="text-xs text-[#6E6D68] mt-0.5">${t.branch} · ${(t.orders || []).length} nota aktif</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="switchAdminTenant('${t.slug}')" class="h-8 px-3 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-white cursor-pointer">Kelola</button>
+              <a href="index.html?mitra=${encodeURIComponent(t.slug)}" class="h-8 px-3 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-[#A09F9A] hover:text-white inline-flex items-center">Web</a>
+              ${
+                !isDefault
+                  ? `<button type="button" onclick="handleDeleteTenant('${t.slug}')" class="h-8 px-2.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs text-[#6E6D68] hover:text-white cursor-pointer">Hapus</button>`
+                  : ""
+              }
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function handleDeleteTenant(slug) {
+      if (window.ServiceStore.deleteTenant(slug)) {
+        switchAdminTenant("kultur-kicks");
+      }
+    }
+
+    function handleResetDemoData() {
+      window.ServiceStore.resetSeedData();
+      initAdminWorkbench();
+      showToast("Data demo direset");
+    }
+
+    // ========================================================================
+    // PHOTO PICKER MODAL & AI COMMAND CENTER (JSON IMPORTER + GEMINI GENERATOR)
+    // ========================================================================
+    let activePhotoTargetInputId = null;
+
+    function renderPhotoPickerGrid(catFilter = "all") {
+      const grid = document.getElementById("ws-picker-grid");
+      if (!grid) return;
+      const list = [];
+      (window.CURATED_WORKSHOP_BANK || []).forEach(group => {
+        if (catFilter !== "all" && group.cat !== catFilter) return;
+        group.urls.forEach((url, i) => {
+          list.push({ label: `${group.label} #${i + 1}`, url });
+        });
+      });
+
+      grid.innerHTML = list.map(it => `
+        <button type="button" onclick="selectPhotoFromBank('${it.url}')" class="group text-left rounded-xl overflow-hidden bg-[#18181C] border border-[#242429] hover:border-white transition-all flex flex-col cursor-pointer">
+          <div class="aspect-[4/3] w-full overflow-hidden bg-black">
+            <img src="${it.url}" alt="${it.label}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          </div>
+          <div class="p-2.5">
+            <p class="text-[11px] font-semibold text-white leading-snug">${it.label}</p>
+            <span class="text-[10px] font-mono-code text-[#A09F9A] group-hover:text-white mt-0.5 block">Klik Gunakan</span>
+          </div>
+        </button>
+      `).join("");
+    }
+
+    window.openWorkshopPhotoPicker = function (inputId) {
+      activePhotoTargetInputId = inputId;
+      renderPhotoPickerGrid("all");
+      const modal = document.getElementById("ws-photo-picker-modal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    };
+
+    function closeWorkshopPhotoPicker() {
+      const modal = document.getElementById("ws-photo-picker-modal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function selectPhotoFromBank(url) {
+      const inp = document.getElementById(activePhotoTargetInputId);
+      if (inp) {
+        inp.value = url;
+        showToast("Foto dipilih, klik Simpan untuk menerapkan");
+      }
+      closeWorkshopPhotoPicker();
+    }
+
+    document.getElementById("ws-picker-tabs").addEventListener("click", e => {
+      const btn = e.target.closest("[data-ws-cat]");
+      if (!btn) return;
+      document.querySelectorAll(".ws-tab-btn").forEach(b => {
+        b.className = "ws-tab-btn px-3 py-1.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] text-[#A09F9A] hover:text-white text-xs font-semibold cursor-pointer";
+      });
+      btn.className = "ws-tab-btn px-3 py-1.5 rounded-[8px] bg-white text-[#111113] font-bold text-xs cursor-pointer";
+      renderPhotoPickerGrid(btn.getAttribute("data-ws-cat"));
+    });
+
+    const WS_GEMINI_KEY_STORAGE = "super_admin_gemini_api_key_v1";
+    let wsAttachedImgBase64 = null;
+    let wsAttachedImgMime = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedKey = localStorage.getItem(WS_GEMINI_KEY_STORAGE);
+      const keyEl = document.getElementById("wsGeminiApiKey");
+      if (keyEl && savedKey) keyEl.value = savedKey;
+    });
+
+    function saveWsGeminiKey() {
+      const val = (document.getElementById("wsGeminiApiKey").value || "").trim();
+      if (!val) {
+        localStorage.removeItem(WS_GEMINI_KEY_STORAGE);
+        showToast("API Key dihapus dari browser");
+        return;
+      }
+      localStorage.setItem(WS_GEMINI_KEY_STORAGE, val);
+      showToast("Gemini API Key tersimpan di browser ini");
+    }
+
+    function handleWsPricelistImage(input) {
+      const file = input.files && input.files[0];
+      const lbl = document.getElementById("wsPricelistImgLabel");
+      if (!file) {
+        wsAttachedImgBase64 = null;
+        wsAttachedImgMime = null;
+        if (lbl) lbl.textContent = "Upload Foto Pricelist (Opsional)";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        wsAttachedImgBase64 = String(reader.result || "").split(",")[1] || "";
+        wsAttachedImgMime = file.type || "image/jpeg";
+        if (lbl) lbl.textContent = `Foto siap: ${file.name.slice(0, 18)}`;
+        showToast("Foto pricelist siap dianalisis AI");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleAutoMatchAllPhotos() {
+      if (!activeTenant) return;
+      const jsonBox = document.getElementById("wsJsonImportBox");
+      if (jsonBox && jsonBox.value.trim()) {
+        try {
+          const parsed = JSON.parse(jsonBox.value);
+          const prof = parsed.profile || parsed;
+          const niche = prof.niche || activeTenant.niche || "sneakers_care";
+          prof.heroImageUrl = window.resolveWorkshopHeroImage(niche);
+          if (Array.isArray(parsed.services)) {
+            parsed.services.forEach((s, idx) => {
+              s.imageUrl = window.resolveWorkshopServiceImage(s.name, s.category, niche, idx);
+            });
+          }
+          jsonBox.value = JSON.stringify(parsed, null, 2);
+        } catch (e) {}
+      }
+
+      const updatedServices = (activeTenant.services || []).map((s, idx) => ({
+        ...s,
+        imageUrl: window.resolveWorkshopServiceImage(s.name, s.category, activeTenant.niche, idx)
+      }));
+      const heroImg = window.resolveWorkshopHeroImage(activeTenant.niche);
+
+      window.ServiceStore.saveTenantProfile(activeTenant.slug, {
+        heroImageUrl: heroImg,
+        services: updatedServices
+      });
+      initAdminWorkbench();
+      showToast(`Seluruh foto ${activeTenant.name} berhasil dicocokkan!`);
+    }
+
+    function handleExportCurrentTenantJson() {
+      if (!activeTenant) return;
+      const payload = {
+        profile: {
+          name: activeTenant.name,
+          branch: activeTenant.branch,
+          niche: activeTenant.niche,
+          serviceMode: activeTenant.serviceMode,
+          themePreset: activeTenant.themePreset,
+          whatsapp: activeTenant.whatsapp,
+          instagram: activeTenant.instagram,
+          address: activeTenant.address,
+          hours: activeTenant.hours,
+          heroHeadline1: activeTenant.heroHeadline1,
+          heroHeadline2: activeTenant.heroHeadline2,
+          heroDesc: activeTenant.heroDesc,
+          pickupPolicy: activeTenant.pickupPolicy,
+          ratingScore: activeTenant.ratingScore,
+          logoUrl: activeTenant.logoUrl || "",
+          heroImageUrl: activeTenant.heroImageUrl || ""
+        },
+        services: activeTenant.services || [],
+        orders: activeTenant.orders || []
+      };
+      const str = JSON.stringify(payload, null, 2);
+      const box = document.getElementById("wsJsonImportBox");
+      if (box) box.value = str;
+      navigator.clipboard.writeText(str);
+      showToast(`JSON ${activeTenant.name} disalin ke clipboard`);
+    }
+
+    async function handleApplyFullTenantJson(rawOverride) {
+      const raw = rawOverride || (document.getElementById("wsJsonImportBox").value || "").trim();
+      if (!raw) {
+        showToast("Kotak JSON masih kosong");
+        return;
+      }
+
+      let parsed = null;
+      try {
+        const clean = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "");
+        parsed = JSON.parse(clean);
+      } catch (e) {
+        showToast("Format JSON tidak valid, periksa tanda kurung");
+        return;
+      }
+
+      const prof = parsed.profile || parsed;
+      const replaceAll = document.getElementById("wsJsonReplaceAll")
+        ? document.getElementById("wsJsonReplaceAll").checked
+        : true;
+      const targetNiche = prof.niche || activeTenant.niche || "sneakers_care";
+
+      window.ServiceStore.saveTenantProfile(activeTenant.slug, {
+        name: (prof.name || activeTenant.name).toUpperCase(),
+        branch: prof.branch || activeTenant.branch,
+        niche: targetNiche,
+        serviceMode: prof.serviceMode || activeTenant.serviceMode || "pickup_delivery",
+        themePreset: prof.themePreset || activeTenant.themePreset || "crimson",
+        whatsapp: prof.whatsapp || activeTenant.whatsapp,
+        instagram: prof.instagram || activeTenant.instagram,
+        address: prof.address || activeTenant.address,
+        hours: prof.hours || activeTenant.hours,
+        heroHeadline1: prof.heroHeadline1 || activeTenant.heroHeadline1,
+        heroHeadline2: prof.heroHeadline2 || activeTenant.heroHeadline2,
+        heroDesc: prof.heroDesc || activeTenant.heroDesc,
+        pickupPolicy: prof.pickupPolicy || activeTenant.pickupPolicy,
+        ratingScore: prof.ratingScore || activeTenant.ratingScore || "4.9",
+        logoUrl: prof.logoUrl !== undefined ? prof.logoUrl : (activeTenant.logoUrl || ""),
+        heroImageUrl: prof.heroImageUrl !== undefined ? prof.heroImageUrl : (activeTenant.heroImageUrl || "")
+      });
+
+      const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+
+      if (Array.isArray(parsed.services) && parsed.services.length > 0) {
+        if (replaceAll) {
+          const oldSrvs = [...(window.ServiceStore.getTenant(activeTenant.slug).services || [])];
+          oldSrvs.forEach(s => window.ServiceStore.deleteService(activeTenant.slug, s.id));
+          if (sb) await sb.from("ws_services").delete().eq("tenant_slug", activeTenant.slug);
+        }
+        parsed.services.forEach((srv, idx) => {
+          window.ServiceStore.upsertService(activeTenant.slug, {
+            id: srv.id || `srv-${Date.now()}-${idx}`,
+            name: srv.name,
+            category: srv.category || "Signature Treatment",
+            price: Number(srv.price) || 50000,
+            promoPrice: srv.promoPrice ? Number(srv.promoPrice) : null,
+            isPromo: Boolean(srv.promoPrice || srv.isPromo),
+            duration: srv.duration || "2–3 Hari",
+            badge: srv.badge || "",
+            available: srv.available !== false,
+            imageUrl: srv.imageUrl || window.resolveWorkshopServiceImage(srv.name, srv.category, targetNiche, idx),
+            desc: srv.desc || srv.description || ""
+          });
+        });
+      }
+
+      if (Array.isArray(parsed.orders) && parsed.orders.length > 0) {
+        if (replaceAll) {
+          const oldOrds = [...(window.ServiceStore.getTenant(activeTenant.slug).orders || [])];
+          oldOrds.forEach(o => window.ServiceStore.deleteOrder(activeTenant.slug, o.orderId));
+          if (sb) await sb.from("ws_orders").delete().eq("tenant_slug", activeTenant.slug);
+        }
+        parsed.orders.forEach((ord, idx) => {
+          window.ServiceStore.upsertOrder(activeTenant.slug, {
+            id: ord.id || `ord-${Date.now()}-${idx}`,
+            orderId: (ord.orderId || `ORD-260${idx + 1}`).toUpperCase(),
+            customerName: ord.customerName || "Pelanggan Studio",
+            phone: ord.phone || "081288990011",
+            itemName: ord.itemName || "Unit Barang",
+            serviceName: ord.serviceName || "Deep Clean",
+            price: Number(ord.price) || 65000,
+            stepIndex: Number(ord.stepIndex) || 2,
+            deliveryType: ord.deliveryType || "Drop-Off Studio",
+            etaDate: ord.etaDate || "Besok · 17:00 WIB",
+            techNote: ord.techNote || "Sedang dalam penanganan teknisi studio."
+          });
+        });
+      }
+
+      // Sync custom_config images map
+      const refreshed = window.ServiceStore.getTenant(activeTenant.slug);
+      window.ServiceStore.saveTenantProfile(activeTenant.slug, { services: refreshed.services });
+
+      initAdminWorkbench();
+      showToast(`Data JSON berhasil diterapkan ke ${activeTenant.slug}`);
+    }
+
+    async function runWsGeminiGenerator() {
+      const key = (document.getElementById("wsGeminiApiKey").value || localStorage.getItem(WS_GEMINI_KEY_STORAGE) || "").trim().replace(/[\s"']/g, "");
+      const brief = (document.getElementById("wsGeminiPrompt").value || "").trim();
+      const btn = document.getElementById("btnRunWsGemini");
+      const btnTxt = document.getElementById("btnRunWsGeminiText");
+
+      if (!key) {
+        showToast("Masukkan Gemini API Key terlebih dahulu");
+        return;
+      }
+      if (!brief && !wsAttachedImgBase64) {
+        showToast("Isi brief prospek atau upload foto pricelist dulu");
+        return;
+      }
+
+      localStorage.setItem(WS_GEMINI_KEY_STORAGE, key);
+      btn.disabled = true;
+      btnTxt.textContent = "Meracik Data Studio...";
+
+      const sysPrompt = `Kamu adalah Copywriter & Operations Architect berstandar NO-AI-SLOP untuk bisnis jasa lokal (Cuci Sepatu / Sneakers Laundry atau Salon & Motodetailing).
+ATURAN KETAT:
+1. DILARANG memakai kata klise AI seperti "menghadirkan pengalaman", "solusi komprehensif", "di era modern", "bukan sekadar", "memanjakan", "percayakan kepada kami".
+2. DILARANG memakai tanda pisah panjang (em-dash). Gunakan titik atau koma.
+3. Gunakan istilah teknis nyata sesuai niche:
+   - Jika cuci sepatu (sneakers_care): sebut material (Suede, Nubuck, Mesh, Primeknit, Boost, Midsole), teknik (dry-foam pH netral, sikat bulu kuda, UV-A chamber unyellowing, ozon antibakteri).
+   - Jika detailing motor (moto_detailing): sebut komponen (fairing, blok mesin, ruang CVT, velg, pernis/clear coat), teknik (bongkar bodi halus, tar & iron remover, paint correction 2-step, nano ceramic 9H curing infrared).
+4. Kembalikan HANYA JSON murni yang valid dengan struktur persis ini:
+{
+  "profile": {
+    "name": "NAMA STUDIO HURUF BESAR",
+    "branch": "Area, Kota",
+    "niche": "sneakers_care atau moto_detailing",
+    "serviceMode": "pickup_delivery atau studio_slot",
+    "themePreset": "crimson atau amber atau cobalt atau emerald",
+    "whatsapp": "6281299887766",
+    "instagram": "@akun.ig",
+    "address": "Alamat lengkap",
+    "hours": "Setiap Hari · 10.00 – 21.00 WIB",
+    "heroHeadline1": "Baris 1 singkat padat (3-4 kata)",
+    "heroHeadline2": "Baris 2 fokus hasil konkret (3-4 kata).",
+    "heroDesc": "Deskripsi lugas 1-2 kalimat tentang pengerjaan teknis dan fitur cek resi live tanpa tanya admin.",
+    "pickupPolicy": "Info jemput-antar kurir atau towing",
+    "ratingScore": "4.9"
+  },
+  "services": [
+    {
+      "name": "Nama Paket",
+      "category": "Daily Wash / Signature Treatment / Restoration / Protection / Nano Ceramic",
+      "price": 65000,
+      "promoPrice": null,
+      "isPromo": false,
+      "duration": "2–3 Hari",
+      "badge": "Terlaris",
+      "desc": "Penjelasan konkret bagian yang dikerjakan dan bahan yang dipakai."
+    }
+  ],
+  "orders": [
+    {
+      "orderId": "KODE-2601",
+      "customerName": "Nama Pelanggan",
+      "phone": "081288990011",
+      "itemName": "Merk & Seri Sepatu/Motor spesifik",
+      "serviceName": "Nama Paket yang diambil",
+      "price": 125000,
+      "stepIndex": 3,
+      "deliveryType": "Pick-Up Kurir atau Drop-Off Studio",
+      "etaDate": "Besok · 17:00 WIB",
+      "techNote": "Catatan kerja teknisi yang spesifik dan realistis."
+    }
+  ]
+}`;
+
+      const parts = [{ text: `${sysPrompt}\n\nDATA PROSPEK TARGET:\n${brief}` }];
+      if (wsAttachedImgBase64) {
+        parts.push({ inline_data: { mime_type: wsAttachedImgMime, data: wsAttachedImgBase64 } });
+      }
+
+      try {
+        const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+        let resultText = "";
+        let lastErr = "";
+
+        for (const m of models) {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`;
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts }],
+              generationConfig: { temperature: 0.35, responseMimeType: "application/json" }
+            })
+          });
+          const bodyTxt = await res.text();
+          if (bodyTxt.trim().startsWith("<")) {
+            lastErr = `Error koneksi (${res.status})`;
+            continue;
+          }
+          const json = JSON.parse(bodyTxt);
+          if (!res.ok) {
+            lastErr = (json && json.error && json.error.message) || `Error pada model ${m}`;
+            continue;
+          }
+          resultText = (json && json.candidates && json.candidates[0] && json.candidates[0].content && json.candidates[0].content.parts && json.candidates[0].content.parts[0] && json.candidates[0].content.parts[0].text) || "";
+          if (resultText) break;
+        }
+
+        if (!resultText) throw new Error(lastErr || "Gagal menghubungi Gemini API");
+
+        const firstBrace = resultText.indexOf("{");
+        const lastBrace = resultText.lastIndexOf("}");
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          resultText = resultText.substring(firstBrace, lastBrace + 1);
+        }
+
+        document.getElementById("wsJsonImportBox").value = resultText;
+        await handleApplyFullTenantJson(resultText);
+      } catch (err) {
+        showToast(`Gagal Generate AI: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btnTxt.textContent = "Generate via Gemini AI";
+      }
+    }
+
+    document.addEventListener("keydown", e => {
+      const tag = (e.target && e.target.tagName) || "";
+      const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+      if (e.key === "Escape") {
+        closeOrderModal();
+        closeWorkshopPhotoPicker();
+      } else if (!isInput && e.key === "/") {
+        e.preventDefault();
+        switchAdminTab("orders");
+        document.getElementById("orderSearchInput").focus();
+      } else if (!isInput && (e.key === "n" || e.key === "N")) {
+        e.preventDefault();
+        openOrderModal();
+      }
+    });
+
+    window.addEventListener("ws-cloud-synced", initAdminWorkbench);
+    document.addEventListener("DOMContentLoaded", initAdminWorkbench);
+  </script>
+<!-- ========================================================================
+       STANDALONE SUPABASE LOGIN & ROLE GUARD (SUPER ADMIN vs OWNER/KASIR)
+       Tempel tepat sebelum </body> di admin.html
+       ======================================================================== -->
+  <div id="ws-auth-gate" class="fixed inset-0 z-[9999] bg-[#0B0B0D] flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-[#121215] border border-[#242429] rounded-2xl p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-[#242429] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-[10px] bg-[var(--brand)] text-white font-mono-code font-bold text-xs flex items-center justify-center">
+            WS
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-white">Portal Operasional Studio</h2>
+            <p class="text-[11px] text-[#A09F9A]">Masuk dengan akun Kasir atau Super Admin</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="ws-auth-error" class="hidden p-3 rounded-[10px] bg-red-950/60 border border-red-500/40 text-xs text-red-200"></div>
+
+      <form id="ws-auth-form" class="space-y-4">
+        <div>
+          <label for="ws-login-email" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Email Akun</label>
+          <input
+            id="ws-login-email"
+            type="email"
+            required
+            placeholder="admin@workshop.com"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white focus:border-white focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label for="ws-login-password" class="block text-xs font-semibold text-[#A09F9A] mb-1.5">Password</label>
+          <input
+            id="ws-login-password"
+            type="password"
+            required
+            placeholder="••••••••"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs text-white focus:border-white focus:outline-none"
+          />
+        </div>
+
+        <button
+          type="submit"
+          id="ws-login-btn"
+          class="w-full h-10 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white text-xs font-bold transition-colors cursor-pointer"
+        >
+          Masuk ke Workbench
+        </button>
+      </form>
+
+      <div class="pt-3 border-t border-[#242429] flex items-center justify-between text-[11px] text-[#6E6D68]">
+        <span>Multi-Tenant Service Engine</span>
+        <a href="index.html" class="text-[#A09F9A] hover:text-white underline">← Ke Web Publik</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const gateEl = document.getElementById("ws-auth-gate");
+      const errEl = document.getElementById("ws-auth-error");
+      const formEl = document.getElementById("ws-auth-form");
+      const btnEl = document.getElementById("ws-login-btn");
+
+      // Kunci Role via CSS <style> agar tidak pernah tertimpa oleh switchAdminTab() atau ws-cloud-synced
+      const roleLockStyle = document.createElement("style");
+      roleLockStyle.id = "ws-owner-role-lock";
+      document.head.appendChild(roleLockStyle);
+
+      function setOwnerLockCss(isOwner) {
+        if (isOwner) {
+          roleLockStyle.textContent = `
+            #navBtn-cloner,
+            #mobTabBtn-cloner,
+            #tabPanel-cloner,
+            #railPitchLink,
+            #adminTenantSelect,
+            label[for="adminTenantSelect"],
+            button[onclick="handleResetDemoData()"],
+            #profNiche,
+            label[for="profNiche"] {
+              display: none !important;
+            }
+          `;
+        } else {
+          roleLockStyle.textContent = "";
+        }
+      }
+
+      // Override switchAdminTab agar Kasir tidak bisa masuk ke tab 'cloner'
+      const origSwitchTab = window.switchAdminTab;
+      if (typeof origSwitchTab === "function") {
+        window.switchAdminTab = function (tabId) {
+          if (window.__wsCurrentRole === "owner" && tabId === "cloner") {
+            tabId = "orders";
+          }
+          origSwitchTab(tabId);
+        };
+      }
+
+      // Override initAdminWorkbench agar tidak memaksa ws_super_admin_mode = "true" bagi Kasir
+      const origInitWorkbench = window.initAdminWorkbench;
+      if (typeof origInitWorkbench === "function") {
+        window.initAdminWorkbench = function () {
+          origInitWorkbench();
+          if (window.__wsCurrentRole === "owner") {
+            localStorage.setItem("ws_super_admin_mode", "false");
+            setOwnerLockCss(true);
+          }
+        };
+      }
+
+      function showAuthError(msg) {
+        if (!errEl) return;
+        errEl.textContent = msg;
+        errEl.classList.remove("hidden");
+      }
+
+      function injectLogoutAndRoleBadge(role) {
+        const topHeaderBtnWrap = document.getElementById("topBarPublicBtn")?.parentElement;
+        if (!topHeaderBtnWrap) return;
+
+        let roleBadge = document.getElementById("ws-role-badge");
+        if (!roleBadge) {
+          roleBadge = document.createElement("span");
+          roleBadge.id = "ws-role-badge";
+          topHeaderBtnWrap.insertBefore(roleBadge, topHeaderBtnWrap.firstChild);
+        }
+        roleBadge.className =
+          role === "super_admin"
+            ? "hidden sm:inline-flex items-center px-2.5 h-9 rounded-[10px] bg-[var(--brand)]/15 border border-[var(--brand)]/40 font-mono-code text-[11px] font-bold text-white"
+            : "hidden sm:inline-flex items-center px-2.5 h-9 rounded-[10px] bg-[#18181C] border border-[#2E2E36] font-mono-code text-[11px] text-[#A09F9A]";
+        roleBadge.textContent = role === "super_admin" ? "SUPER ADMIN" : "KASIR STUDIO";
+
+        if (!document.getElementById("ws-logout-btn")) {
+          const logoutBtn = document.createElement("button");
+          logoutBtn.type = "button";
+          logoutBtn.id = "ws-logout-btn";
+          logoutBtn.className = "h-9 px-3 rounded-[10px] bg-[#18181C] hover:bg-red-950/60 border border-[#2E2E36] text-xs font-semibold text-[#A09F9A] hover:text-red-200 transition-colors cursor-pointer";
+          logoutBtn.textContent = "Keluar";
+          logoutBtn.onclick = async () => {
+            const sb = window.getSupabaseClient && window.getSupabaseClient();
+            if (sb) await sb.auth.signOut();
+            localStorage.removeItem("ws_super_admin_mode");
+            window.__wsCurrentRole = null;
+            window.location.reload();
+          };
+          topHeaderBtnWrap.appendChild(logoutBtn);
+        }
+      }
+
+      function applyRolePermissions(profile) {
+        const isSuper = profile.role === "super_admin";
+        window.__wsCurrentRole = isSuper ? "super_admin" : "owner";
+
+        const tenantSelectWrap = document.getElementById("adminTenantSelect")?.parentElement;
+
+        if (isSuper) {
+          localStorage.setItem("ws_super_admin_mode", "true");
+          setOwnerLockCss(false);
+          if (tenantSelectWrap) tenantSelectWrap.classList.remove("hidden");
+        } else {
+          localStorage.setItem("ws_super_admin_mode", "false");
+          setOwnerLockCss(true);
+          if (tenantSelectWrap) tenantSelectWrap.classList.add("hidden");
+
+          // Jika di database dikunci ke 1 toko tertentu, paksa buka toko tersebut
+          if (profile.tenant_slug) {
+            const url = new URL(window.location.href);
+            if (url.searchParams.get("mitra") !== profile.tenant_slug) {
+              localStorage.setItem("active_mitra_slug", profile.tenant_slug);
+              url.searchParams.set("mitra", profile.tenant_slug);
+              window.history.replaceState({}, "", url.toString());
+            }
+          }
+          // Paksa pindah ke tab Antrean Nota
+          if (typeof window.switchAdminTab === "function") {
+            window.switchAdminTab("orders");
+          }
+        }
+
+        injectLogoutAndRoleBadge(window.__wsCurrentRole);
+        gateEl.classList.add("hidden");
+        if (typeof window.initAdminWorkbench === "function") {
+          window.initAdminWorkbench();
+        }
+      }
+
+      async function verifySessionAndRole(session) {
+        if (!session || !session.user) {
+          gateEl.classList.remove("hidden");
+          return;
+        }
+
+        const sb = window.getSupabaseClient();
+        const { data: rows, error } = await sb.rpc("get_my_ws_admin_profile");
+
+        if (error || !rows || rows.length === 0) {
+          await sb.auth.signOut();
+          showAuthError("Akun ini belum terdaftar di tabel ws_admin_users.");
+          gateEl.classList.remove("hidden");
+          return;
+        }
+
+        applyRolePermissions(rows[0]);
+      }
+
+      formEl?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errEl.classList.add("hidden");
+        const email = document.getElementById("ws-login-email").value.trim();
+        const password = document.getElementById("ws-login-password").value;
+
+        const sb = window.getSupabaseClient && window.getSupabaseClient();
+        if (!sb) {
+          showAuthError("SDK Supabase sedang dimuat, tunggu 1 detik lalu klik lagi.");
+          return;
+        }
+
+        btnEl.disabled = true;
+        btnEl.textContent = "Memeriksa Akun...";
+
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        btnEl.disabled = false;
+        btnEl.textContent = "Masuk ke Workbench";
+
+        if (error) {
+          showAuthError("Email atau password salah: " + error.message);
+          return;
+        }
+
+        await verifySessionAndRole(data.session);
+      });
+
+      function bootAuthCheck(retries = 20) {
+        const sb = window.getSupabaseClient && window.getSupabaseClient();
+        if (!sb) {
+          if (retries > 0) return setTimeout(() => bootAuthCheck(retries - 1), 150);
+          return;
+        }
+        sb.auth.getSession().then(({ data }) => {
+          if (data && data.session) {
+            verifySessionAndRole(data.session);
+          } else {
+            gateEl.classList.remove("hidden");
+          }
+        });
+      }
+
+      window.addEventListener("DOMContentLoaded", () => bootAuthCheck());
+    })();
+  </script>
+</body>
+</html>
