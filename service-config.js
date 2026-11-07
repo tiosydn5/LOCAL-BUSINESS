@@ -150,6 +150,26 @@ window.SERVICE_ENGINE_CONFIG = {
       ]
     },
     {
+      cat: "laundry",
+      label: "Laundry Kiloan, Setrika Uap, Karpet & Sofa Care",
+      keywords: ["laundry", "kiloan", "setrika", "steam", "karpet", "carpet", "sofa", "spring bed", "bed cover", "gordyn", "pakaian", "jas", "dry clean"],
+      urls: [
+        "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?auto=format&fit=crop&w=800&q=80"
+      ]
+    },
+    {
+      cat: "barber",
+      label: "Barbershop, Gentleman Haircut, Fade & Hot Towel",
+      keywords: ["barber", "haircut", "cut", "fade", "taper", "potong rambut", "grooming", "beard", "shave", "kumis", "janggut", "pomade", "coloring", "perm", "smoothing"],
+      urls: [
+        "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=800&q=80"
+      ]
+    },
+    {
       cat: "studio",
       label: "Interior Studio Sneakers & Detailing Garage",
       keywords: ["studio", "workshop", "bay", "garasi", "rak", "interior", "hero"],
@@ -179,9 +199,15 @@ window.SERVICE_ENGINE_CONFIG = {
     }
 
     if (!bestEntry) {
-      bestEntry = niche === "moto_detailing"
-        ? window.CURATED_WORKSHOP_BANK.find(e => e.cat === "moto_detail")
-        : window.CURATED_WORKSHOP_BANK[0];
+      if (niche === "moto_detailing") {
+        bestEntry = window.CURATED_WORKSHOP_BANK.find(e => e.cat === "moto_detail");
+      } else if (niche === "laundry_care") {
+        bestEntry = window.CURATED_WORKSHOP_BANK.find(e => e.cat === "laundry");
+      } else if (niche === "barber_studio") {
+        bestEntry = window.CURATED_WORKSHOP_BANK.find(e => e.cat === "barber");
+      } else {
+        bestEntry = window.CURATED_WORKSHOP_BANK[0];
+      }
     }
 
     const urls = bestEntry.urls;
@@ -189,9 +215,16 @@ window.SERVICE_ENGINE_CONFIG = {
   };
 
   window.resolveWorkshopHeroImage = function (niche) {
-    return niche === "moto_detailing"
-      ? "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=80"
-      : "https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=1200&q=80";
+    if (niche === "moto_detailing") {
+      return "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=80";
+    }
+    if (niche === "laundry_care") {
+      return "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?auto=format&fit=crop&w=1200&q=80";
+    }
+    if (niche === "barber_studio") {
+      return "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=1200&q=80";
+    }
+    return "https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=1200&q=80";
   };
 
   window.applyWorkshopTheme = function (themeKey) {
@@ -400,6 +433,198 @@ window.SERVICE_ENGINE_CONFIG = {
         {
           q: "Apakah tersedia layanan Towing jemput-antar?",
           a: "Tersedia. Pilih opsi Towing pada kalkulator booking dan tim kami akan menjadwalkan penjemputan."
+        }
+      ]
+    },
+    laundry_care: {
+      label: "Laundry Express, Carpet & Home Care",
+      shortLabel: "Laundry & Care",
+      unitName: "Kg / Unit",
+      itemPlaceholder: "Pakaian 5 Kg / Karpet Turki / Sofa L",
+      steps: [
+        {
+          step: 1,
+          code: "SORT",
+          period: "Tahap 01",
+          label: "Timbang & Sortir",
+          desc: "Penimbangan berat/ukuran, sortir warna pakaian, dan cek noda berat.",
+          defaultNote: "Cucian diterima & ditimbang. Sudah disortir berdasarkan warna dan serat kain."
+        },
+        {
+          step: 2,
+          code: "WASH",
+          period: "Tahap 02",
+          label: "Washing & Extraction",
+          desc: "Pencucian antibakteri atau vakum ekstraksi mendalam untuk sofa/karpet.",
+          defaultNote: "Sedang proses pencucian utama dengan deterjen cair ramah serat & disinfektan."
+        },
+        {
+          step: 3,
+          code: "DRY",
+          period: "Tahap 03",
+          label: "Hygienic Drying",
+          desc: "Pengeringan mesin suhu terkontrol bebas bau apek.",
+          defaultNote: "Proses pengeringan higienis di mesin tumbler dryer suhu terukur."
+        },
+        {
+          step: 4,
+          code: "STEAM",
+          period: "Tahap 04",
+          label: "Setrika Uap & Parfum",
+          desc: "Setrika uap boiler bertekanan tinggi dan pelipatan rapi.",
+          defaultNote: "Sedang proses setrika uap (steam press), pemberian parfum grade A & pengemasan."
+        },
+        {
+          step: 5,
+          code: "READY",
+          period: "Tahap 05",
+          label: "Siap Antar / Ambil",
+          desc: "Sudah dikemas plastik kedap debu. Siap diambil atau diantar kurir.",
+          defaultNote: "Selesai dikemas rapi & wangi. Siap diambil atau dikirim kurir ke alamat Anda."
+        }
+      ],
+      addons: [
+        { id: "express", label: "Kilat Express 6 Jam", desc: "Selesai di hari yang sama (prioritas mesin)", price: 25000 },
+        { id: "protect", label: "Anti-Tungau & Disinfektan", desc: "Cairan khusus pembasmi tungau & bakteri", price: 20000 }
+      ],
+      inspectionZones: [
+        {
+          code: "LN-01",
+          title: "Pakaian Harian & Kemeja",
+          part: "Katun / Linen / Rayon",
+          tool: "1 Mesin 1 Pelanggan",
+          detail: "Pakaian tidak pernah dicampur dengan cucian pelanggan lain."
+        },
+        {
+          code: "LN-02",
+          title: "Karpet & Permadani",
+          part: "Bulu Tebal / Wol / Sintetis",
+          tool: "Rotary Carpet Polisher",
+          detail: "Sikat mesin putar dan bilas bertekanan tinggi hingga ke dasar karpet."
+        },
+        {
+          code: "LN-03",
+          title: "Sofa & Spring Bed",
+          part: "Busa / Kain Fabric / Kulit",
+          tool: "Hydro-Vacuum Extractor",
+          detail: "Sedot debu tungau, noda keringat, dan kotoran membandel (panggilan ke rumah)."
+        },
+        {
+          code: "LN-04",
+          title: "Bed Cover & Gordyn",
+          part: "Serat Tebal / King Size",
+          tool: "Boiler Steam Press",
+          detail: "Pencucian kapasitas besar dan uap panas agar serat kembali mengembang."
+        }
+      ],
+      faqs: [
+        {
+          q: "Apakah pakaian saya dicampur dengan pelanggan lain?",
+          a: "Tidak pernah. Kami menerapkan standar 1 Mesin 1 Nota Pelanggan untuk menjaga kebersihan dan mencegah pakaian tertukar."
+        },
+        {
+          q: "Apakah cuci sofa dan spring bed dikerjakan di rumah pelanggan?",
+          a: "Ya, untuk sofa dan spring bed tim teknisi kami datang membawa peralatan Hydro-Vacuum ke rumah Anda. Untuk karpet dan pakaian bisa dijemput kurir."
+        },
+        {
+          q: "Bagaimana cara menghitung estimasi biaya di website?",
+          a: "Pilih jenis layanan (Kiloan, Satuan, Karpet, atau Sofa) dan masukkan jumlah Kg/Unit pada kalkulator booking di bawah."
+        }
+      ]
+    },
+    barber_studio: {
+      label: "Premier Barbershop & Men's Grooming",
+      shortLabel: "Barber Studio",
+      unitName: "Orang",
+      itemPlaceholder: "Comma Hair / Taper Fade + Beard Trim (Capster: Rian)",
+      steps: [
+        {
+          step: 1,
+          code: "BOOK",
+          period: "Tahap 01",
+          label: "Jadwal Terkonfirmasi",
+          desc: "Slot jam potong dan pilihan capster sudah dikunci di jadwal studio.",
+          defaultNote: "Slot jadwal potong Anda sudah tercatat. Silakan datang 10 menit sebelum jam booking."
+        },
+        {
+          step: 2,
+          code: "LOUNGE",
+          period: "Tahap 02",
+          label: "Check-In & Konsultasi",
+          desc: "Pelanggan tiba di studio, analisis bentuk wajah & arah tumbuh rambut.",
+          defaultNote: "Pelanggan sudah check-in di kursi. Konsultasi gaya potongan dengan capster."
+        },
+        {
+          step: 3,
+          code: "CUT",
+          period: "Tahap 03",
+          label: "Precision Haircut",
+          desc: "Eksekusi gunting, clipper fade presisi, dan perapihan janggut/kumis.",
+          defaultNote: "Sedang proses potong rambut presisi (fade & texturizing) oleh capster."
+        },
+        {
+          step: 4,
+          code: "WASH",
+          period: "Tahap 04",
+          label: "Hair Wash & Hot Towel",
+          desc: "Keramas bersih, handuk hangat relaksasi, dan pijat kepala-bahu.",
+          defaultNote: "Proses keramas menyegarkan, kompres handuk hangat (hot towel) & pijat relaksasi."
+        },
+        {
+          step: 5,
+          code: "STYLE",
+          period: "Tahap 05",
+          label: "Pomade Styling & Selesai",
+          desc: "Aplikasi hair tonic, blow-dry, styling pomade/powder, dan siap tampil.",
+          defaultNote: "Sesi grooming selesai. Rambut sudah di-styling rapi."
+        }
+      ],
+      addons: [
+        { id: "express", label: "VIP Priority Slot (Tanpa Antre)", desc: "Kunci jam pasti tanpa tunggu walk-in", price: 15000 },
+        { id: "protect", label: "Black Mask & Face Scrub", desc: "Angkat komedo & perawatan wajah pria", price: 35000 }
+      ],
+      inspectionZones: [
+        {
+          code: "BR-01",
+          title: "Fade & Taper Precision",
+          part: "Side & Back Gradation",
+          tool: "Zero-Gap Clipper",
+          detail: "Gradasi tipis bertahap yang bersih dan menyatu alami dengan bentuk kepala."
+        },
+        {
+          code: "BR-02",
+          title: "Top Texture & Volume",
+          part: "Crown & Fringe",
+          tool: "Japanese Thinning Scissors",
+          detail: "Penyesuaian volume rambut atas agar mudah diatur setiap hari."
+        },
+        {
+          code: "BR-03",
+          title: "Beard & Mustache Sculpting",
+          part: "Jawline & Facial Hair",
+          tool: "Straight Razor & Hot Towel",
+          detail: "Cukur garis rahang dengan handuk hangat dan pisau cukur steril sekali pakai."
+        },
+        {
+          code: "BR-04",
+          title: "Scalp & Hair Care",
+          part: "Kulit Kepala & Akar Rambut",
+          tool: "Cooling Tonic & Shiatsu",
+          detail: "Keramas bersih dari sisa potongan rambut disertai pijat relaksasi leher."
+        }
+      ],
+      faqs: [
+        {
+          q: "Bagaimana cara booking jam potong agar tidak mengantre lama?",
+          a: "Pilih paket grooming di kalkulator bawah, tulis jam kedatangan dan nama capster pilihan Anda, lalu klik tombol Terbitkan Nota & Kirim WA."
+        },
+        {
+          q: "Apakah semua paket sudah termasuk keramas dan pomade?",
+          a: "Untuk paket Gentleman Cut ke atas sudah lengkap termasuk Hair Wash, Hot Towel, pijat bahu, dan styling pomade/clay."
+        },
+        {
+          q: "Apakah alat cukur dijamin steril?",
+          a: "Seluruh clipper disemprot disinfektan setiap selesai 1 pelanggan, dan silet cukur (razor blade) selalu diganti baru."
         }
       ]
     }
@@ -658,21 +883,51 @@ window.SERVICE_ENGINE_CONFIG = {
       const templateDonor = Object.values(map).find(t => t.niche === targetNiche) || src;
       const prefixCode = newName.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "MTR";
 
+      const defaultMetaByNiche = {
+        sneakers_care: {
+          serviceMode: "pickup_delivery",
+          themePreset: "crimson",
+          h1: "Restorasi Presisi untuk",
+          h2: "Koleksi Sepatu Harian.",
+          desc: `Studio perawatan sepatu berstandar laboratorium di ${newBranch}. Lacak progres pengerjaan sepatu Anda secara real-time.`
+        },
+        moto_detailing: {
+          serviceMode: "studio_slot",
+          themePreset: "amber",
+          h1: "Koreksi Cat & Proteksi",
+          h2: "Nano Ceramic Kelas Kontes.",
+          desc: `Workshop detailing motor & helm presisi di ${newBranch}. Lacak progres pengerjaan motor Anda langsung dari HP.`
+        },
+        laundry_care: {
+          serviceMode: "pickup_delivery",
+          themePreset: "emerald",
+          h1: "Higienis 1 Mesin 1 Pelanggan",
+          h2: "untuk Pakaian, Karpet & Sofa.",
+          desc: `Layanan laundry express, setrika uap, serta cuci karpet & sofa panggilan di ${newBranch}. Pantau tahapan cucian Anda langsung dari HP.`
+        },
+        barber_studio: {
+          serviceMode: "studio_slot",
+          themePreset: "cobalt",
+          h1: "Potongan Presisi & Grooming",
+          h2: "Tanpa Antre di Kursi Studio.",
+          desc: `Barbershop & men's grooming studio di ${newBranch}. Kunci jadwal jam potong serta capster pilihan Anda dan lacak antrean langsung dari HP.`
+        }
+      };
+      const meta = defaultMetaByNiche[targetNiche] || defaultMetaByNiche.sneakers_care;
+
       map[newSlug] = {
         ...JSON.parse(JSON.stringify(templateDonor)),
         slug: newSlug,
         name: newName.toUpperCase(),
         branch: newBranch,
         niche: targetNiche,
-        serviceMode: targetNiche === "moto_detailing" ? "studio_slot" : "pickup_delivery",
-        themePreset: targetNiche === "moto_detailing" ? "amber" : "crimson",
+        serviceMode: meta.serviceMode,
+        themePreset: meta.themePreset,
         instagram: "@" + newSlug.replace(/-/g, "."),
         address: `Studio ${newName.toUpperCase()}, Area ${newBranch}`,
-        heroHeadline1: targetNiche === "moto_detailing" ? "Koreksi Cat & Proteksi" : "Restorasi Presisi untuk",
-        heroHeadline2: targetNiche === "moto_detailing" ? "Nano Ceramic Kelas Kontes." : "Koleksi Sepatu Harian.",
-        heroDesc: targetNiche === "moto_detailing"
-          ? `Workshop detailing motor & helm presisi di ${newBranch}. Lacak progres pengerjaan motor Anda langsung dari HP.`
-          : `Studio perawatan sepatu berstandar laboratorium di ${newBranch}. Lacak progres pengerjaan sepatu Anda secara real-time.`,
+        heroHeadline1: meta.h1,
+        heroHeadline2: meta.h2,
+        heroDesc: meta.desc,
         services: JSON.parse(JSON.stringify(templateDonor.services)),
         orders: JSON.parse(JSON.stringify(templateDonor.orders)).map((o, i) => ({
           ...o,
