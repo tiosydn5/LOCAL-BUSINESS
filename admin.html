@@ -2142,14 +2142,14 @@ ATURAN KETAT:
       window.addEventListener("DOMContentLoaded", () => bootAuthCheck());
     })();
   </script>
-    <!-- AUTO-INJECT TOMBOL UPLOAD FOTO DARI GALERI HP / PERANGKAT -->
+  
+  <!-- AUTO-INJECT TOMBOL UPLOAD FOTO DARI GALERI HP (RAPI & ANTI-OFFSIDE DI MOBILE) -->
   <input type="file" id="wsHiddenDeviceFileInput" accept="image/jpeg,image/png,image/webp" class="hidden" />
   <script>
     (function () {
       const fileInput = document.getElementById("wsHiddenDeviceFileInput");
       let currentTargetInputId = null;
 
-      // Fungsi kompres gambar otomatis via Canvas + Upload Supabase (Fallback Base64)
       function compressImageToDataUrl(file, maxWidth = 800, quality = 0.78) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -2191,7 +2191,6 @@ ATURAN KETAT:
 
         let finalUrl = "";
         try {
-          // 1. Coba upload ke Supabase Storage jika memungkinkan
           const sb = window.getSupabaseClient && window.getSupabaseClient();
           const bucket = (window.SERVICE_ENGINE_CONFIG && window.SERVICE_ENGINE_CONFIG.STORAGE_BUCKET_NAME) || "cafe-assets";
           if (sb) {
@@ -2205,7 +2204,6 @@ ATURAN KETAT:
           }
         } catch (err) {}
 
-        // 2. Fallback Wajib: Jika Storage gagal/belum diset, kompres via Canvas jadi DataURL ringan
         if (!finalUrl) {
           try {
             finalUrl = await compressImageToDataUrl(file, 800, 0.78);
@@ -2220,31 +2218,49 @@ ATURAN KETAT:
         if (typeof showToast === "function") showToast("Foto berhasil dimuat! Klik Simpan untuk menerapkan.");
       });
 
-      // Suntik tombol "Upload File HP" secara otomatis ke dekat semua tombol Pilih Foto
       function injectUploadButtons() {
-        const targets = ["srvImageInput", "profLogoImgInput", "profHeroImgInput"];
-        targets.forEach((id) => {
+        // 1. Rapikan input Logo & Hero di Profil Studio agar input di atas (w-full) & 2 tombol rata di bawahnya
+        ["profLogoImgInput", "profHeroImgInput"].forEach((id) => {
+          const inputEl = document.getElementById(id);
           const pickerBtn = document.querySelector(`button[onclick*="${id}"]`);
-          if (pickerBtn && !pickerBtn.parentElement.querySelector(`[data-upload-for="${id}"]`)) {
+          if (!inputEl || !pickerBtn) return;
+
+          const wrap = inputEl.parentElement;
+          wrap.className = "flex flex-wrap gap-2 w-full";
+          inputEl.className = "w-full h-10 px-3 rounded-[10px] bg-[#18181C] border border-[#2E2E36] text-xs font-mono-code text-white focus:border-white focus:outline-none";
+          pickerBtn.className = "flex-1 h-9 px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[#2E2E36] text-xs font-semibold text-white cursor-pointer inline-flex items-center justify-center";
+
+          if (!wrap.querySelector(`[data-upload-for="${id}"]`)) {
             const upBtn = document.createElement("button");
             upBtn.type = "button";
             upBtn.setAttribute("data-upload-for", id);
-            upBtn.className = pickerBtn.className;
-            upBtn.style.borderColor = "var(--brand)";
+            upBtn.className = "flex-1 h-9 px-3 rounded-[10px] bg-[#18181C] hover:bg-[#242429] border border-[var(--brand)] text-xs font-semibold text-white cursor-pointer inline-flex items-center justify-center";
             upBtn.textContent = "Upload File HP";
             upBtn.onclick = () => window.triggerWorkshopDeviceUpload(id);
-            pickerBtn.parentElement.insertBefore(upBtn, pickerBtn);
+            wrap.insertBefore(upBtn, pickerBtn);
           }
         });
 
-        // Tambahkan juga di dalam header Modal Photo Picker
+        // 2. Tambahkan tombol Upload File HP di form Daftar Paket Layanan (srvImageInput)
+        const srvPickerBtn = document.querySelector(`button[onclick*="srvImageInput"]`);
+        if (srvPickerBtn && !srvPickerBtn.parentElement.querySelector(`[data-upload-for="srvImageInput"]`)) {
+          const upBtn = document.createElement("button");
+          upBtn.type = "button";
+          upBtn.setAttribute("data-upload-for", "srvImageInput");
+          upBtn.className = "h-7 px-2.5 rounded-[8px] bg-[#18181C] hover:bg-[#242429] border border-[var(--brand)] text-[11px] font-semibold text-white cursor-pointer";
+          upBtn.textContent = "Upload File HP";
+          upBtn.onclick = () => window.triggerWorkshopDeviceUpload("srvImageInput");
+          srvPickerBtn.parentElement.insertBefore(upBtn, srvPickerBtn);
+        }
+
+        // 3. Tambahkan tombol di dalam header Modal Photo Picker
         const modalCloseBtn = document.querySelector('#ws-photo-picker-modal button[onclick="closeWorkshopPhotoPicker()"]');
         if (modalCloseBtn && !document.getElementById("wsModalUploadDeviceBtn")) {
           const modalUpBtn = document.createElement("button");
           modalUpBtn.type = "button";
           modalUpBtn.id = "wsModalUploadDeviceBtn";
-          modalUpBtn.className = "h-8 px-3 rounded-[8px] bg-[var(--brand)] text-white text-xs font-bold cursor-pointer shrink-0";
-          modalUpBtn.textContent = "+ Upload Galeri HP";
+          modalUpBtn.className = "h-8 px-2.5 rounded-[8px] bg-[var(--brand)] text-white text-[11px] font-bold cursor-pointer shrink-0";
+          modalUpBtn.textContent = "+ Galeri HP";
           modalUpBtn.onclick = () => {
             const activeId = typeof activePhotoTargetInputId !== "undefined" ? activePhotoTargetInputId : "srvImageInput";
             window.triggerWorkshopDeviceUpload(activeId);
@@ -2260,5 +2276,6 @@ ATURAN KETAT:
       }
     })();
   </script>
+
 </body>
 </html>
