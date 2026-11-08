@@ -1206,6 +1206,7 @@
     window.addEventListener("ws-cloud-synced", initPublicPage);
     document.addEventListener("DOMContentLoaded", initPublicPage);
   </script>
+  
   <!-- FIX ANTI GESER SAMPING (HORIZONTAL OVERFLOW) DI HP -->
   <style>
     html, body {
@@ -1225,5 +1226,25 @@
       white-space: normal !important;
     }
   </style>
+  
+    <!-- FIX MUNCULIN HERO BANNER LANDSCAPE DI HP & LAPTOP -->
+  <script>
+    function unhideHeroBannerIfLoaded() {
+      const wrap = document.getElementById("dynamicHeroImgWrap");
+      if (wrap && wrap.querySelector("img")) {
+        wrap.classList.remove("hidden");
+      }
+    }
+    window.addEventListener("DOMContentLoaded", () => setTimeout(unhideHeroBannerIfLoaded, 150));
+    window.addEventListener("ws-cloud-synced", () => setTimeout(unhideHeroBannerIfLoaded, 150));
+    const origRenderHero = window.renderBrandingAndHero;
+    if (typeof origRenderHero === "function") {
+      window.renderBrandingAndHero = function () {
+        origRenderHero();
+        unhideHeroBannerIfLoaded();
+      };
+    }
+  </script>
+
 </body>
 </html>
