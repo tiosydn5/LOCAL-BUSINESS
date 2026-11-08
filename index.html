@@ -1206,5 +1206,24 @@
     window.addEventListener("ws-cloud-synced", initPublicPage);
     document.addEventListener("DOMContentLoaded", initPublicPage);
   </script>
+  <!-- FIX ANTI GESER SAMPING (HORIZONTAL OVERFLOW) DI HP -->
+  <style>
+    html, body {
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+      position: relative;
+    }
+    main, section, header, footer, #trackerResultMount {
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+    }
+    .grid > * {
+      min-width: 0 !important;
+    }
+    #heroBadgeLocation, #footerAddress, #footerPickupPolicy {
+      word-break: break-word;
+      white-space: normal !important;
+    }
+  </style>
 </body>
 </html>
