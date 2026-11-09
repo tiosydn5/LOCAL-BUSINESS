@@ -2436,6 +2436,22 @@ ATURAN KETAT:
       }
     })();
   </script>
+  <!-- ANTI-FLASH NAMA MITRA DI ADMIN.HTML -->
+  <script>
+    (function () {
+      const slug = window.getActiveMitraSlug ? window.getActiveMitraSlug() : "kultur-kicks";
+      const t = window.ServiceStore && window.ServiceStore.getTenant(slug);
+      if (!t || t.slug !== slug) {
+        const prettyName = slug.replace(/-/g, " ").toUpperCase();
+        const storeEl = document.getElementById("railStoreName");
+        const branchEl = document.getElementById("railBranchName");
+        const logoEl = document.getElementById("railLogoBox");
+        if (storeEl) storeEl.textContent = prettyName;
+        if (branchEl) branchEl.textContent = "Memuat data cloud...";
+        if (logoEl) logoEl.textContent = prettyName.slice(0, 3);
+      }
+    })();
+  </script>
 
 </body>
 </html>
