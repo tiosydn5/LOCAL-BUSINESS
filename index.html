@@ -1246,5 +1246,50 @@
     }
   </script>
 
+    <!-- AUTO-LINK INSTAGRAM, WHATSAPP, & GOOGLE MAPS DI INDEX.HTML -->
+  <script>
+    function makeContactInfoClickable() {
+      // 1. Ubah Instagram (@username) jadi link langsung ke aplikasi/web Instagram
+      const igEl = document.getElementById("footerInstagram");
+      if (igEl) {
+        const rawIg = (igEl.textContent || "").trim();
+        const cleanUser = rawIg.replace(/^@+/, "").replace(/\s+/g, "");
+        if (cleanUser) {
+          igEl.innerHTML = `<a href="https://instagram.com/${encodeURIComponent(cleanUser)}" target="_blank" rel="noopener" class="underline hover:text-[var(--brand)] transition-colors">@${cleanUser}</a>`;
+        }
+      }
+
+      // 2. Ubah Nomor WhatsApp jadi link langsung buka chat WA
+      const waEl = document.getElementById("footerWhatsapp");
+      if (waEl) {
+        const rawWa = (waEl.textContent || "").trim();
+        const cleanWa = rawWa.replace(/[^0-9]/g, "").replace(/^0/, "62");
+        if (cleanWa) {
+          waEl.innerHTML = `<a href="https://wa.me/${cleanWa}" target="_blank" rel="noopener" class="underline hover:text-[var(--brand)] transition-colors">${rawWa}</a>`;
+        }
+      }
+
+      // 3. Ubah Alamat Workshop jadi link langsung ke Google Maps
+      const addrEl = document.getElementById("footerAddress");
+      if (addrEl && !addrEl.querySelector("a")) {
+        const rawAddr = (addrEl.textContent || "").trim();
+        if (rawAddr && rawAddr !== "-") {
+          addrEl.innerHTML = `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(rawAddr)}" target="_blank" rel="noopener" class="hover:text-[var(--brand)] underline decoration-[#C4C1B6] transition-colors">${rawAddr}</a>`;
+        }
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => setTimeout(makeContactInfoClickable, 150));
+    window.addEventListener("ws-cloud-synced", () => setTimeout(makeContactInfoClickable, 150));
+
+    const origRenderBrand = window.renderBrandingAndHero;
+    if (typeof origRenderBrand === "function") {
+      window.renderBrandingAndHero = function () {
+        origRenderBrand();
+        makeContactInfoClickable();
+      };
+    }
+  </script>
+
 </body>
 </html>
