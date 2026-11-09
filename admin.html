@@ -2379,36 +2379,43 @@ ATURAN KETAT:
       window.addEventListener("ws-cloud-synced", enhanceAdminMobileUX);
     })();
   </script>
-  <!-- DYNAMIC NICHE MODAL ADAPTER DI ADMIN.HTML -->
+  <!-- DYNAMIC NICHE MODAL ADAPTER DI ADMIN.HTML (VERSI FIX) -->
   <script>
     (function () {
       const ADMIN_NICHE_MODAL = {
         sneakers_care: {
           itemLabel: "Merk Sepatu / Tas & Warna",
           itemPlaceholder: "Salomon XT-6 White Lunar",
-          deliveryOptions: ["Drop-Off Workshop", "Pick-Up Kurir"]
-        },
-        moto_detailing: {
-          itemLabel: "Tipe Motor, CC & Warna",
-          itemPlaceholder: "Yamaha XMAX 250 Matte Black",
-          deliveryOptions: ["Booking Bay Bengkel", "Towing Pick-Up", "Home Detailing"]
+          delivLabel: "Metode Serah Terima",
+          deliveryOptions: ["Antar Sendiri ke Workshop", "Jemput & Antar Kurir"]
         },
         laundry_care: {
           itemLabel: "Rincian Cucian / Karpet / Sofa",
           itemPlaceholder: "Karpet 2x3m / Pakaian 7 Kg / Sofa L",
-          deliveryOptions: ["Drop-Off Outlet", "Pick-Up Kurir", "Home Service (Sofa/Kasur)"]
+          delivLabel: "Metode Layanan",
+          deliveryOptions: ["Antar Sendiri ke Outlet", "Jemput Kurir", "Home Service (Cuci Sofa/Kasur)"]
+        },
+        moto_detailing: {
+          itemLabel: "Tipe Motor, CC & Warna",
+          itemPlaceholder: "Yamaha XMAX 250 Matte Black",
+          delivLabel: "Sesi Kedatangan Bengkel",
+          deliveryOptions: ["Slot Pagi (09.00 - 12.00 WIB)", "Slot Siang (13.00 - 16.00 WIB)", "Drop-Off Langsung"]
         },
         barber_studio: {
-          itemLabel: "Gaya Potongan & Nama Capster",
+          itemLabel: "Gaya Rambut & Nama Capster",
           itemPlaceholder: "Two Block Cut (Capster: Rian)",
-          deliveryOptions: ["Booking Jam Pasti", "Walk-In Hari Ini", "VIP Priority Slot"]
+          delivLabel: "Sesi Waktu Booking",
+          deliveryOptions: ["Sesi Siang / Sore (10.00 - 17.00)", "Sesi Malam (17.00 - 21.00)", "Walk-In Langsung"]
         }
       };
 
       const origOpenModal = window.openOrderModal;
       if (typeof origOpenModal === "function") {
         window.openOrderModal = function (orderId) {
-          const nicheKey = (window.activeTenant && window.activeTenant.niche) || "sneakers_care";
+          origOpenModal(orderId);
+          let t = null;
+          try { if (typeof activeTenant !== "undefined") t = activeTenant; } catch (e) {}
+          const nicheKey = (t && t.niche) || "sneakers_care";
           const cfg = ADMIN_NICHE_MODAL[nicheKey] || ADMIN_NICHE_MODAL.sneakers_care;
 
           const itemLbl = document.querySelector('label[for="ordItemInput"]');
@@ -2416,14 +2423,15 @@ ATURAN KETAT:
           if (itemLbl) itemLbl.textContent = cfg.itemLabel;
           if (itemInp) itemInp.placeholder = cfg.itemPlaceholder;
 
+          const delivLbl = document.querySelector('label[for="ordDeliverySelect"]');
           const delivSel = document.getElementById("ordDeliverySelect");
+          if (delivLbl) delivLbl.textContent = cfg.delivLabel;
           if (delivSel) {
+            const currentVal = delivSel.value;
             delivSel.innerHTML = cfg.deliveryOptions
-              .map(opt => `<option value="${opt}">${opt}</option>`)
+              .map(opt => `<option value="${opt}" ${opt === currentVal ? "selected" : ""}>${opt}</option>`)
               .join("");
           }
-
-          origOpenModal(orderId);
         };
       }
     })();
