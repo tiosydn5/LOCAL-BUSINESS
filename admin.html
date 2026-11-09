@@ -2379,6 +2379,55 @@ ATURAN KETAT:
       window.addEventListener("ws-cloud-synced", enhanceAdminMobileUX);
     })();
   </script>
+  <!-- DYNAMIC NICHE MODAL ADAPTER DI ADMIN.HTML -->
+  <script>
+    (function () {
+      const ADMIN_NICHE_MODAL = {
+        sneakers_care: {
+          itemLabel: "Merk Sepatu / Tas & Warna",
+          itemPlaceholder: "Salomon XT-6 White Lunar",
+          deliveryOptions: ["Drop-Off Workshop", "Pick-Up Kurir"]
+        },
+        moto_detailing: {
+          itemLabel: "Tipe Motor, CC & Warna",
+          itemPlaceholder: "Yamaha XMAX 250 Matte Black",
+          deliveryOptions: ["Booking Bay Bengkel", "Towing Pick-Up", "Home Detailing"]
+        },
+        laundry_care: {
+          itemLabel: "Rincian Cucian / Karpet / Sofa",
+          itemPlaceholder: "Karpet 2x3m / Pakaian 7 Kg / Sofa L",
+          deliveryOptions: ["Drop-Off Outlet", "Pick-Up Kurir", "Home Service (Sofa/Kasur)"]
+        },
+        barber_studio: {
+          itemLabel: "Gaya Potongan & Nama Capster",
+          itemPlaceholder: "Two Block Cut (Capster: Rian)",
+          deliveryOptions: ["Booking Jam Pasti", "Walk-In Hari Ini", "VIP Priority Slot"]
+        }
+      };
+
+      const origOpenModal = window.openOrderModal;
+      if (typeof origOpenModal === "function") {
+        window.openOrderModal = function (orderId) {
+          const nicheKey = (window.activeTenant && window.activeTenant.niche) || "sneakers_care";
+          const cfg = ADMIN_NICHE_MODAL[nicheKey] || ADMIN_NICHE_MODAL.sneakers_care;
+
+          const itemLbl = document.querySelector('label[for="ordItemInput"]');
+          const itemInp = document.getElementById("ordItemInput");
+          if (itemLbl) itemLbl.textContent = cfg.itemLabel;
+          if (itemInp) itemInp.placeholder = cfg.itemPlaceholder;
+
+          const delivSel = document.getElementById("ordDeliverySelect");
+          if (delivSel) {
+            delivSel.innerHTML = cfg.deliveryOptions
+              .map(opt => `<option value="${opt}">${opt}</option>`)
+              .join("");
+          }
+
+          origOpenModal(orderId);
+        };
+      }
+    })();
+  </script>
 
 </body>
 </html>
