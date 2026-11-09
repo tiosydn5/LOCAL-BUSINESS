@@ -833,7 +833,19 @@ window.SERVICE_ENGINE_CONFIG = {
 
     getTenant(slug) {
       const map = getLocalStoreMap();
-      return map[slug] || map["kultur-kicks"] || Object.values(map)[0];
+      if (map[slug]) return map[slug];
+      const cleanName = (slug || "studio").replace(/-/g, " ").toUpperCase();
+      return {
+        ...(map["kultur-kicks"] || Object.values(map)[0]),
+        slug: slug,
+        name: cleanName,
+        branch: "Memuat...",
+        heroHeadline1: cleanName,
+        heroHeadline2: "Memuat Layanan...",
+        heroDesc: "Sedang menyinkronkan katalog layanan dan data nota terbaru...",
+        services: [],
+        orders: []
+      };
     },
 
     saveTenantProfile(slug, updatedFields) {
