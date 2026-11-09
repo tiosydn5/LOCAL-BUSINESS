@@ -2277,5 +2277,108 @@ ATURAN KETAT:
     })();
   </script>
 
+    <!-- FIX UX MOBILE: AUTO-SCROLL EDIT PAKET, TOMBOL + TAMBAH PAKET, & SIMPAN PROFIL BAWAH -->
+  <script>
+    (function () {
+      function enhanceAdminMobileUX() {
+        // 1. Tambahkan tombol "+ Tambah Paket" di pojok kanan atas kotak Daftar Paket Layanan
+        const srvListBox = document.getElementById("adminServicesList");
+        const srvHeader = srvListBox ? srvListBox.previousElementSibling : null;
+        if (srvHeader && !document.getElementById("btnQuickAddService")) {
+          const rightSpan = srvHeader.querySelector("span");
+          if (rightSpan) rightSpan.className = "hidden sm:inline text-xs text-[#A09F9A]";
+
+          const addBtn = document.createElement("button");
+          addBtn.type = "button";
+          addBtn.id = "btnQuickAddService";
+          addBtn.className = "h-8 px-3 rounded-[8px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer shrink-0";
+          addBtn.innerHTML = `<span>+ Tambah Paket</span>`;
+          addBtn.onclick = () => {
+            if (typeof window.resetServiceForm === "function") window.resetServiceForm();
+            const formEl = document.getElementById("serviceFormHeading")?.closest("form");
+            if (formEl) {
+              formEl.scrollIntoView({ behavior: "smooth", block: "start" });
+              formEl.classList.add("ring-2", "ring-[var(--brand)]");
+              setTimeout(() => formEl.classList.remove("ring-2", "ring-[var(--brand)]"), 1200);
+            }
+            setTimeout(() => document.getElementById("srvNameInput")?.focus(), 350);
+            if (typeof window.showToast === "function") window.showToast("Mode Tambah Paket Baru siap diisi");
+          };
+          srvHeader.appendChild(addBtn);
+        }
+
+        // 2. Ubah tombol "Reset" di form paket jadi tombol "Batal Edit / Mode Tambah" yang lebih jelas
+        const resetBtn = document.querySelector('button[onclick="resetServiceForm()"]');
+        if (resetBtn) {
+          resetBtn.className = "h-7 px-2.5 rounded-[8px] bg-[#18181C] border border-[#2E2E36] text-[11px] font-semibold text-[#A09F9A] hover:text-white cursor-pointer";
+          resetBtn.textContent = "+ Mode Tambah Baru";
+        }
+
+        // 3. Tambahkan tombol "Simpan Profil Studio" di paling bawah form Profil (biar di HP nggak usah scroll balik ke atas)
+        const profForm = document.querySelector('#tabPanel-profile form');
+        if (profForm && !document.getElementById("btnBottomSaveProfile")) {
+          const bottomWrap = document.createElement("div");
+          bottomWrap.className = "pt-4 border-t border-[#242429] flex justify-end";
+          bottomWrap.innerHTML = `
+            <button type="submit" id="btnBottomSaveProfile" class="w-full sm:w-auto h-10 px-6 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white text-xs font-bold transition-colors cursor-pointer">
+              Simpan Perubahan Profil Studio
+            </button>
+          `;
+          profForm.appendChild(bottomWrap);
+        }
+      }
+
+      // 4. Override editServiceRow() agar otomatis scroll ke form bawah + kasih efek kedip & toast
+      const origEditService = window.editServiceRow;
+      if (typeof origEditService === "function") {
+        window.editServiceRow = function (srvId) {
+          origEditService(srvId);
+          const formEl = document.getElementById("serviceFormHeading")?.closest("form");
+          const submitBtn = formEl?.querySelector('button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = "Update Paket Layanan";
+
+          if (formEl) {
+            formEl.scrollIntoView({ behavior: "smooth", block: "start" });
+            formEl.classList.add("ring-2", "ring-[var(--brand)]");
+            setTimeout(() => formEl.classList.remove("ring-2", "ring-[var(--brand)]"), 1200);
+          }
+          if (typeof window.showToast === "function") {
+            window.showToast("Data dimuat di form bawah — silakan edit");
+          }
+        };
+      }
+
+      // 5. Override resetServiceForm() agar teks tombol balik jadi "+ Simpan Paket Baru"
+      const origResetService = window.resetServiceForm;
+      if (typeof origResetService === "function") {
+        window.resetServiceForm = function () {
+          origResetService();
+          const formEl = document.getElementById("serviceFormHeading")?.closest("form");
+          const submitBtn = formEl?.querySelector('button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = "+ Simpan Paket Baru";
+        };
+      }
+
+      // 6. Override handleSaveService() agar setelah simpan otomatis scroll balik ke daftar atas di HP
+      const origSaveService = window.handleSaveService;
+      if (typeof origSaveService === "function") {
+        window.handleSaveService = function () {
+          origSaveService();
+          const topList = document.getElementById("tabPanel-services");
+          if (topList && window.innerWidth < 1024) {
+            topList.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        };
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", enhanceAdminMobileUX);
+      } else {
+        enhanceAdminMobileUX();
+      }
+      window.addEventListener("ws-cloud-synced", enhanceAdminMobileUX);
+    })();
+  </script>
+
 </body>
 </html>
