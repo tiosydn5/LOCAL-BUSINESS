@@ -1290,6 +1290,173 @@
       };
     }
   </script>
+  <!-- DYNAMIC NICHE FORM ADAPTER (SEPATU, MOTOR, LAUNDRY, BARBERSHOP) -->
+  <script>
+    (function () {
+      const NICHE_FORM_CONFIG = {
+        sneakers_care: {
+          sectionTitle: "Kalkulator Estimasi & Form Booking Sepatu",
+          sectionSub: "Isi rincian sepatu/tas di bawah ini. Saat dikirim, sistem menerbitkan Nomor Nota Tahap 1 dan meneruskan pesanan ke WhatsApp admin.",
+          itemLabel: "Merk Sepatu / Tas & Warna",
+          itemPlaceholder: "cth: Salomon XT-6 White / Vans Old Skool Suede",
+          unitName: "Pasang",
+          modeHeading: "Metode Serah Terima Sepatu",
+          opt1Value: "Drop-Off Workshop",
+          opt1Title: "Antar ke Workshop",
+          opt1Desc: "Serah terima langsung di kasir studio",
+          opt2Value: "Pick-Up Kurir",
+          opt2Title: "Jemput & Antar Kurir",
+          opt2Desc: "Dijemput kurir ke alamat rumah/kos Anda",
+          noteLabel: "Catatan Kondisi Sepatu / Alamat Jemput",
+          notePlaceholder: "Contoh: Midsole menguning & noda kopi di suede / Jemput sore di Jl. Margonda...",
+          summaryItemLabel: "Unit Sepatu/Tas",
+          summaryModeLabel: "Serah Terima",
+          waIntro: "saya sudah membuat tiket perawatan sepatu via web",
+          waItemLabel: "Sepatu/Barang"
+        },
+        moto_detailing: {
+          sectionTitle: "Kalkulator Paket & Booking Slot Detailing",
+          sectionSub: "Pilih paket sesuai CC motor Anda dan kunci slot bay pengerjaan harian agar motor langsung ditangani tanpa antre di bengkel.",
+          itemLabel: "Tipe Motor, CC & Warna Cat",
+          itemPlaceholder: "cth: Yamaha XMAX 250 Matte Black / Vespa Sprint White",
+          unitName: "Unit Motor",
+          modeHeading: "Metode Pengerjaan Bengkel",
+          opt1Value: "Booking Bay Bengkel",
+          opt1Title: "Datang ke Bengkel (Booking Bay)",
+          opt1Desc: "Kunci slot jam kerja di workshop kami",
+          opt2Value: "Towing / Home Detailing",
+          opt2Title: "Jemput Towing / Home Service",
+          opt2Desc: "Penjemputan motor atau pengerjaan di garasi rumah",
+          noteLabel: "Jam Rencana Datang / Catatan Kondisi Cat",
+          notePlaceholder: "Contoh: Booking besok jam 10.00 pagi, ada baret halus di fairing kanan...",
+          summaryItemLabel: "Kendaraan",
+          summaryModeLabel: "Metode Bengkel",
+          waIntro: "saya ingin booking slot detailing motor via web",
+          waItemLabel: "Unit Motor"
+        },
+        laundry_care: {
+          sectionTitle: "Kalkulator Biaya & Order Jemput / Home Care",
+          sectionSub: "Hitung estimasi biaya cuci kiloan, karpet, atau panggilan cuci sofa/spring bed ke rumah Anda secara instan.",
+          itemLabel: "Jenis Cucian / Ukuran Karpet & Sofa",
+          itemPlaceholder: "cth: Pakaian Harian / Karpet 2x3m / Sofa L 3 Dudukan",
+          unitName: "Kg / Unit",
+          modeHeading: "Metode Penjemputan & Pengerjaan",
+          opt1Value: "Drop-Off Outlet",
+          opt1Title: "Antar Sendiri ke Outlet",
+          opt1Desc: "Serahkan cucian langsung di outlet kami",
+          opt2Value: "Pick-Up Kurir / Home Service",
+          opt2Title: "Jemput Kurir / Panggilan ke Rumah",
+          opt2Desc: "Kurir jemput pakaian/karpet atau teknisi cuci sofa ke rumah",
+          noteLabel: "Alamat Lengkap Penjemputan / Panggilan Rumah",
+          notePlaceholder: "Contoh: Jemput hari ini jam 14.00 di Perumahan Griya Cilodong Blok B2...",
+          summaryItemLabel: "Rincian Cucian",
+          summaryModeLabel: "Layanan Kurir/Home",
+          waIntro: "saya ingin pesan layanan laundry / cuci perabot via web",
+          waItemLabel: "Item/Cucian"
+        },
+        barber_studio: {
+          sectionTitle: "Reservasi Kursi Capster & Kalkulator Grooming",
+          sectionSub: "Amankan jadwal jam potong Anda sebelum datang ke barbershop agar langsung duduk di kursi capster tanpa antre panjang.",
+          itemLabel: "Gaya Potongan & Pilihan Capster",
+          itemPlaceholder: "cth: Two Block + Down Perm (Capster: Rian)",
+          unitName: "Orang",
+          modeHeading: "Tipe Kedatangan Barbershop",
+          opt1Value: "Booking Jam Pasti",
+          opt1Title: "Booking Jam & Kursi Pasti",
+          opt1Desc: "Datang sesuai jam pilihan, bebas antrean",
+          opt2Value: "Walk-In Hari Ini",
+          opt2Title: "Walk-In (Ambil Antrean Hari Ini)",
+          opt2Desc: "Daftar antrean terlebih dahulu sebelum berangkat",
+          noteLabel: "Jam Kedatangan (Wajib) & Request Potongan",
+          notePlaceholder: "Contoh: Datang hari ini jam 16.30 WIB, samping fade tipis...",
+          summaryItemLabel: "Gaya & Capster",
+          summaryModeLabel: "Tipe Reservasi",
+          waIntro: "saya ingin reservasi jadwal potong rambut (booking kursi) via web",
+          waItemLabel: "Model & Capster"
+        }
+      };
+
+      function applyNicheFormAdaptation() {
+        if (!window.currentTenant) return;
+        const nicheKey = window.currentTenant.niche || "sneakers_care";
+        const cfg = NICHE_FORM_CONFIG[nicheKey] || NICHE_FORM_CONFIG.sneakers_care;
+
+        // 1. Judul Section Booking
+        const secH2 = document.querySelector("#bookingSection h2");
+        const secP = document.querySelector("#bookingSection h2 + p");
+        if (secH2) secH2.textContent = cfg.sectionTitle;
+        if (secP) secP.textContent = cfg.sectionSub;
+
+        // 2. Label & Placeholder Input Barang/Layanan
+        const itemLbl = document.querySelector('label[for="bookItemName"]');
+        const itemInp = document.getElementById("bookItemName");
+        if (itemLbl) itemLbl.textContent = cfg.itemLabel;
+        if (itemInp) itemInp.placeholder = cfg.itemPlaceholder;
+
+        const unitSpan = document.getElementById("unitLabelSpan");
+        if (unitSpan) unitSpan.textContent = cfg.unitName;
+
+        // 3. Radio Metode Layanan (Drop-Off vs Pick-Up / Booking Kursi / Home Service)
+        const radios = document.querySelectorAll('input[name="deliveryMode"]');
+        if (radios.length >= 2) {
+          const r1 = radios[0];
+          const r2 = radios[1];
+          const modeHeadingEl = r1.closest(".grid")?.previousElementSibling;
+          if (modeHeadingEl) modeHeadingEl.textContent = cfg.modeHeading;
+
+          r1.value = cfg.opt1Value;
+          const r1Box = r1.nextElementSibling;
+          if (r1Box && r1Box.children.length >= 2) {
+            r1Box.children[0].textContent = cfg.opt1Title;
+            r1Box.children[1].textContent = cfg.opt1Desc;
+          }
+
+          r2.value = cfg.opt2Value;
+          const r2Box = r2.nextElementSibling;
+          if (r2Box && r2Box.children.length >= 2) {
+            r2Box.children[0].textContent = cfg.opt2Title;
+            r2Box.children[1].textContent = window.currentTenant.pickupPolicy || cfg.opt2Desc;
+          }
+        }
+
+        // 4. Label & Placeholder Catatan
+        const noteLbl = document.querySelector('label[for="bookNotesInput"]');
+        const noteInp = document.getElementById("bookNotesInput");
+        if (noteLbl) noteLbl.textContent = cfg.noteLabel;
+        if (noteInp) noteInp.placeholder = cfg.notePlaceholder;
+
+        // 5. Label di Ringkasan Tiket Hitam
+        const sumItemRow = document.getElementById("summaryItem")?.previousElementSibling;
+        const sumDelivRow = document.getElementById("summaryDelivery")?.previousElementSibling;
+        if (sumItemRow) sumItemRow.textContent = cfg.summaryItemLabel;
+        if (sumDelivRow) sumDelivRow.textContent = cfg.summaryModeLabel;
+
+        // 6. Label Quick Stat di Hero ("Serah Terima" -> sesuai niche)
+        const statDelivEl = document.getElementById("statDeliveryMode");
+        if (statDelivEl) {
+          if (nicheKey === "barber_studio") statDelivEl.textContent = "Booking Kursi";
+          else if (nicheKey === "moto_detailing") statDelivEl.textContent = "Slot Bay & Towing";
+          else if (nicheKey === "laundry_care") statDelivEl.textContent = "Kurir & Home Care";
+          else statDelivEl.textContent = "Jemput & Antar";
+        }
+
+        if (typeof window.recalculateBooking === "function") {
+          window.recalculateBooking();
+        }
+      }
+
+      const origPopulate = window.populateBookingForm;
+      if (typeof origPopulate === "function") {
+        window.populateBookingForm = function () {
+          origPopulate();
+          applyNicheFormAdaptation();
+        };
+      }
+
+      window.addEventListener("DOMContentLoaded", () => setTimeout(applyNicheFormAdaptation, 120));
+      window.addEventListener("ws-cloud-synced", () => setTimeout(applyNicheFormAdaptation, 120));
+    })();
+  </script>
 
 </body>
 </html>
