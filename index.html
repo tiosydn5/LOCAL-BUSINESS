@@ -122,13 +122,13 @@
   <header class="sticky top-0 z-40 bg-[#F5F4F0]/95 backdrop-blur-md border-b border-[#DCDAD2]">
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4">
       <a href="#top" aria-label="Beranda Studio" class="flex items-center gap-2.5 sm:gap-3 group focus:outline-none min-w-0">
-        <div id="navLogoBox" class="w-9 h-9 rounded-[10px] bg-[#111113] text-white font-mono-code font-bold text-xs flex items-center justify-center tracking-tight shrink-0 overflow-hidden transition-opacity duration-200"></div>
+        <div id="navLogoBox" class="w-9 h-9 rounded-[10px] bg-[#111113] text-white font-mono-code font-bold text-xs flex items-center justify-center tracking-tight shrink-0 overflow-hidden">KLK</div>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <span id="navBrandName" class="font-bold text-sm sm:text-base tracking-tight text-[#111113] leading-tight transition-opacity duration-200"></span>
-            <span id="navNicheBadge" class="hidden sm:inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#EBE9E2] text-[#4A4945] border border-[#DCDAD2] transition-opacity duration-200"></span>
+            <span id="navBrandName" class="font-bold text-sm sm:text-base tracking-tight text-[#111113] leading-tight">KULTUR KICKS LAB</span>
+            <span id="navNicheBadge" class="hidden sm:inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#EBE9E2] text-[#4A4945] border border-[#DCDAD2]">Sneaker Lab</span>
           </div>
-          <p id="navBranchText" class="text-[11px] sm:text-xs text-[#78766F] mt-0.5 leading-tight transition-opacity duration-200"></p>
+          <p id="navBranchText" class="text-[11px] sm:text-xs text-[#78766F] mt-0.5 leading-tight">Margonda, Depok</p>
         </div>
       </a>
 
@@ -199,7 +199,9 @@
                 Studio perawatan sepatu berstandar laboratorium. Lacak tahapan pengerjaan barang Anda secara langsung tanpa perlu menunggu balasan admin.
               </p>
 
-              <div id="dynamicHeroImgWrap" class="hidden mt-4 rounded-2xl overflow-hidden border border-[#DCDAD2] bg-[#EBE9E2] h-40 sm:h-48 max-w-[54ch] relative"></div>
+              <div id="dynamicHeroImgWrap" class="mt-4 rounded-2xl overflow-hidden border border-[#DCDAD2] bg-[#18181C] h-40 sm:h-48 max-w-[54ch] relative">
+                <img id="heroBannerImg" src="https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=800&q=75" alt="Banner Studio Layanan" width="600" height="192" fetchpriority="high" class="w-full h-full object-cover" />
+              </div>
 
               <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EBE9E2] border border-[#DCDAD2] text-xs font-medium text-[#4A4945]">
                 <span class="w-2 h-2 rounded-full bg-[var(--brand)]"></span>
@@ -235,7 +237,7 @@
 
               <div class="mt-3.5 pt-3.5 border-t border-[#EBE9E2] flex flex-wrap items-center gap-2">
                 <span class="text-xs text-[#78766F]">Contoh nota aktif:</span>
-                <div id="sampleResiChips" class="flex flex-wrap gap-1.5"></div>
+                <div id="sampleResiChips" class="flex flex-wrap gap-1.5 min-h-[28px]"></div>
               </div>
             </div>
 
@@ -277,7 +279,7 @@
                 </span>
               </div>
 
-              <div id="trackerResultMount" class="p-5 sm:p-6">
+              <div id="trackerResultMount" class="p-5 sm:p-6 min-h-[430px] sm:min-h-[410px]">
                 <!-- Populated by renderTrackedOrder() -->
               </div>
             </div>
@@ -305,7 +307,7 @@
               <span>Tahapan Standar Operasional</span>
               <span class="text-[#78766F] font-normal">Klik baris untuk lihat rincian</span>
             </div>
-            <div id="sopStepsMount" class="divide-y divide-[#EBE9E2]"></div>
+            <div id="sopStepsMount" class="divide-y divide-[#EBE9E2] min-h-[360px]"></div>
           </div>
 
           <div class="lg:col-span-5 bg-white rounded-2xl border border-[#DCDAD2] overflow-hidden">
@@ -313,7 +315,7 @@
               <span>Penanganan Komponen & Alat</span>
               <span id="anatomyUnitTag" class="text-[#78766F] font-normal">Spesifikasi Teknis</span>
             </div>
-            <div id="anatomyZonesMount" class="divide-y divide-[#EBE9E2]"></div>
+            <div id="anatomyZonesMount" class="divide-y divide-[#EBE9E2] min-h-[360px]"></div>
           </div>
         </div>
       </div>
@@ -681,17 +683,15 @@
         ? `${currentTenant.name} — ${currentTenant.branch}`
         : currentTenant.name;
       const logoBox = document.getElementById("navLogoBox");
-      if (currentTenant.isPlaceholder) {
-        logoBox.textContent = "";
-      } else if (currentTenant.logoUrl) {
-        logoBox.innerHTML = `<img src="${currentTenant.logoUrl}" alt="Logo ${safeBrandAlt}" fetchpriority="high" class="w-full h-full object-cover transition-opacity duration-200" onerror="this.parentElement.textContent='${initials}'" />`;
+      if (currentTenant.logoUrl) {
+        logoBox.innerHTML = `<img src="${currentTenant.logoUrl}" alt="Logo ${safeBrandAlt}" fetchpriority="high" class="w-full h-full object-cover" onerror="this.parentElement.textContent='${initials}'" />`;
       } else {
         logoBox.textContent = initials;
       }
 
-      document.getElementById("navBrandName").textContent = currentTenant.isPlaceholder ? "" : currentTenant.name;
-      document.getElementById("navNicheBadge").textContent = currentTenant.isPlaceholder ? "" : nicheDef.shortLabel;
-      document.getElementById("navBranchText").textContent = currentTenant.isPlaceholder ? "" : currentTenant.branch;
+      document.getElementById("navBrandName").textContent = currentTenant.name;
+      document.getElementById("navNicheBadge").textContent = nicheDef.shortLabel;
+      document.getElementById("navBranchText").textContent = currentTenant.branch || "Studio Layanan";
 
       document.getElementById("heroBadgeLocation").textContent = currentTenant.branch
         ? `${nicheDef.label} · ${currentTenant.branch}`
@@ -700,10 +700,13 @@
       document.getElementById("heroHeadline2").textContent = currentTenant.heroHeadline2;
       document.getElementById("heroDescText").textContent = currentTenant.heroDesc;
 
-      const heroImgWrap = document.getElementById("dynamicHeroImgWrap");
-      if (heroImgWrap) {
-        heroImgWrap.classList.add("hidden");
-        heroImgWrap.innerHTML = "";
+      const heroBannerImg = document.getElementById("heroBannerImg");
+      if (heroBannerImg) {
+        const nextHeroSrc = currentTenant.heroImageUrl || (window.resolveWorkshopHeroImage ? window.resolveWorkshopHeroImage(currentTenant.niche) : "https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=800&q=75");
+        if (heroBannerImg.getAttribute("src") !== nextHeroSrc) {
+          heroBannerImg.src = nextHeroSrc;
+        }
+        heroBannerImg.alt = `Banner layanan ${safeBrandAlt}`;
       }
 
       document.getElementById("statRatingScore").textContent = currentTenant.ratingScore || "4.9";
