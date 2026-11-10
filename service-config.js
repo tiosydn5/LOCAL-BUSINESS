@@ -844,22 +844,26 @@ window.SERVICE_ENGINE_CONFIG = {
     getTenant(slug) {
       const map = getLocalStoreMap();
       if (map[slug]) return map[slug];
+      const base = map["kultur-kicks"] || Object.values(map)[0];
       const cleanName = (slug || "studio").replace(/-/g, " ").toUpperCase();
+      const prefix = cleanName.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "STD";
       return {
-        ...(map["kultur-kicks"] || Object.values(map)[0]),
+        ...base,
         slug: slug,
         name: cleanName,
-        branch: "",
+        branch: "Studio Partner",
         address: "Memuat lokasi studio...",
-        instagram: "",
+        instagram: "@" + (slug || "studio").replace(/-/g, "."),
         logoUrl: "",
         heroImageUrl: "",
-        pickupPolicy: "Memuat informasi layanan studio...",
-        heroHeadline1: cleanName,
-        heroHeadline2: "Layanan Perawatan & Reservasi Studio.",
-        heroDesc: "Lacak tahapan pengerjaan barang dan reservasi layanan studio secara langsung.",
-        services: [],
-        orders: [],
+        pickupPolicy: "Layanan perawatan & reservasi studio terpadu.",
+        heroHeadline1: "Perawatan Presisi di",
+        heroHeadline2: cleanName + ".",
+        heroDesc: "Studio perawatan & layanan berstandar profesional. Lacak tahapan pengerjaan barang Anda secara langsung tanpa perlu menunggu balasan admin.",
+        services: base && base.services ? base.services : [],
+        orders: base && base.orders && base.orders.length > 0
+          ? [{ ...base.orders[0], orderId: `${prefix}-2601` }]
+          : [],
         isPlaceholder: true
       };
     },
