@@ -13,15 +13,25 @@ window.SERVICE_ENGINE_CONFIG = {
 
 (function ensureSupabaseSdk() {
   if (typeof window.supabase === "undefined") {
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-    s.async = true;
-    s.onload = () => {
-      if (window.ServiceStore && window.ServiceStore.syncFromCloud) {
-        window.ServiceStore.syncFromCloud();
-      }
+    const loadSdk = () => {
+      setTimeout(() => {
+        if (typeof window.supabase !== "undefined") return;
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        s.async = true;
+        s.onload = () => {
+          if (window.ServiceStore && window.ServiceStore.syncFromCloud) {
+            window.ServiceStore.syncFromCloud();
+          }
+        };
+        document.head.appendChild(s);
+      }, 100);
     };
-    document.head.appendChild(s);
+    if (document.readyState === "complete") {
+      loadSdk();
+    } else {
+      window.addEventListener("load", loadSdk, { once: true });
+    }
   }
 })();
 

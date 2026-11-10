@@ -8,10 +8,7 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="service-config.js"></script>
   <style>
     :root {
@@ -705,13 +702,8 @@
 
       const heroImgWrap = document.getElementById("dynamicHeroImgWrap");
       if (heroImgWrap) {
-        if (currentTenant.heroImageUrl) {
-          heroImgWrap.classList.remove("hidden");
-          heroImgWrap.innerHTML = `<img src="${currentTenant.heroImageUrl}" alt="Banner layanan ${safeBrandAlt}" fetchpriority="high" class="w-full h-full object-cover transition-opacity duration-300" onerror="this.parentElement.classList.add('hidden')" />`;
-        } else {
-          heroImgWrap.classList.add("hidden");
-          heroImgWrap.innerHTML = "";
-        }
+        heroImgWrap.classList.add("hidden");
+        heroImgWrap.innerHTML = "";
       }
 
       document.getElementById("statRatingScore").textContent = currentTenant.ratingScore || "4.9";
@@ -1272,9 +1264,6 @@
       }
     }
 
-    window.addEventListener("DOMContentLoaded", () => setTimeout(makeContactInfoClickable, 150));
-    window.addEventListener("ws-cloud-synced", () => setTimeout(makeContactInfoClickable, 150));
-
     const origRenderBrand = window.renderBrandingAndHero;
     if (typeof origRenderBrand === "function") {
       window.renderBrandingAndHero = function () {
@@ -1507,8 +1496,8 @@
         }
       }
 
-      // Hook ke seluruh fungsi render di index.html agar selalu jalan otomatis
-      ["initPublicPage", "populateBookingForm", "renderTrackedOrder", "switchTenantDemo"].forEach(fnName => {
+      // Hook cukup pada initPublicPage dan switchTenantDemo agar applyCompleteNicheUI hanya jalan 1x per render
+      ["initPublicPage", "switchTenantDemo"].forEach(fnName => {
         const orig = window[fnName];
         if (typeof orig === "function") {
           window[fnName] = function () {
@@ -1518,10 +1507,6 @@
           };
         }
       });
-
-      window.addEventListener("DOMContentLoaded", () => setTimeout(applyCompleteNicheUI, 100));
-      window.addEventListener("ws-cloud-synced", () => setTimeout(applyCompleteNicheUI, 100));
-      setTimeout(applyCompleteNicheUI, 250);
     })();
   </script>
 </body>
