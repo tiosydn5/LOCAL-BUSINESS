@@ -13,24 +13,36 @@ window.SERVICE_ENGINE_CONFIG = {
 
 (function ensureSupabaseSdk() {
   if (typeof window.supabase === "undefined") {
-    const loadSdk = () => {
-      setTimeout(() => {
-        if (typeof window.supabase !== "undefined") return;
-        const s = document.createElement("script");
-        s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        s.async = true;
-        s.onload = () => {
-          if (window.ServiceStore && window.ServiceStore.syncFromCloud) {
-            window.ServiceStore.syncFromCloud();
-          }
-        };
-        document.head.appendChild(s);
-      }, 100);
+    const injectScript = () => {
+      if (typeof window.supabase !== "undefined") return;
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      s.async = true;
+      s.onload = () => {
+        if (window.ServiceStore && window.ServiceStore.syncFromCloud) {
+          window.ServiceStore.syncFromCloud();
+        }
+      };
+      document.head.appendChild(s);
     };
-    if (document.readyState === "complete") {
-      loadSdk();
+
+    let isUncachedCustomMitra = false;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlMitra = (params.get("mitra") || "").trim().toLowerCase();
+      if (urlMitra && urlMitra !== "kultur-kicks") {
+        const raw = localStorage.getItem(window.SERVICE_ENGINE_CONFIG.STORAGE_KEY_PREFIX + "tenants");
+        const map = raw ? JSON.parse(raw) : {};
+        if (!map[urlMitra]) isUncachedCustomMitra = true;
+      }
+    } catch (e) {}
+
+    if (isUncachedCustomMitra) {
+      injectScript();
+    } else if (document.readyState === "complete") {
+      setTimeout(injectScript, 100);
     } else {
-      window.addEventListener("load", loadSdk, { once: true });
+      window.addEventListener("load", () => setTimeout(injectScript, 100), { once: true });
     }
   }
 })();
@@ -845,6 +857,23 @@ window.SERVICE_ENGINE_CONFIG = {
       const map = getLocalStoreMap();
       if (map[slug]) return map[slug];
       const base = map["kultur-kicks"] || Object.values(map)[0];
+      const s = String(slug || "studio").toLowerCase();
+      let guessedNiche = "sneakers_care";
+      let guessedTheme = "crimson";
+      let guessedMode = "pickup_delivery";
+      if (/moto|garage|vespa|auto|helm|bike/.test(s)) {
+        guessedNiche = "moto_detailing";
+        guessedTheme = "amber";
+        guessedMode = "studio_slot";
+      } else if (/barber|luxe|cut|groom|hair|gentlemen/.test(s)) {
+        guessedNiche = "barber_studio";
+        guessedTheme = "cobalt";
+        guessedMode = "studio_slot";
+      } else if (!/shoe|sneaker|kicks/.test(s) && /laundry|klean|carpet|sofa|wash/.test(s)) {
+        guessedNiche = "laundry_care";
+        guessedTheme = "emerald";
+        guessedMode = "pickup_delivery";
+      }
       const cleanName = (slug || "studio").replace(/-/g, " ").toUpperCase();
       const prefix = cleanName.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "STD";
       return {
@@ -852,18 +881,33 @@ window.SERVICE_ENGINE_CONFIG = {
         slug: slug,
         name: cleanName,
         branch: "Studio Partner",
+        niche: guessedNiche,
+        themePreset: guessedTheme,
+        serviceMode: guessedMode,
         address: "Memuat lokasi studio...",
         instagram: "@" + (slug || "studio").replace(/-/g, "."),
         logoUrl: "",
         heroImageUrl: "",
         pickupPolicy: "Layanan perawatan & reservasi studio terpadu.",
-        heroHeadline1: "Perawatan Presisi di",
+        heroHeadline1: "Layanan Presisi di",
         heroHeadline2: cleanName + ".",
-        heroDesc: "Studio perawatan & layanan berstandar profesional. Lacak tahapan pengerjaan barang Anda secara langsung tanpa perlu menunggu balasan admin.",
-        services: base && base.services ? base.services : [],
-        orders: base && base.orders && base.orders.length > 0
-          ? [{ ...base.orders[0], orderId: `${prefix}-2601` }]
-          : [],
+        heroDesc: "Studio layanan berstandar operasional terukur. Lacak tahapan pengerjaan atau jadwal reservasi Anda secara langsung dari HP.",
+        services: [],
+        orders: [
+          {
+            id: "ord-Wait",
+            orderId: `${prefix}-2601`,
+            customerName: "Pelanggan Studio",
+            phone: "-",
+            itemName: "Memuat Data Unit...",
+            serviceName: "Sinkronisasi Layanan Studio",
+            price: 0,
+            stepIndex: 1,
+            deliveryType: "Studio",
+            etaDate: "Live",
+            techNote: "Menghubungkan ke meja operasional studio..."
+          }
+        ],
         isPlaceholder: true
       };
     },

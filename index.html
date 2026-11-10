@@ -287,27 +287,27 @@
                 <div class="space-y-5">
                   <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-[#242429]">
                     <div>
-                      <div class="font-mono-code text-2xl font-bold text-white tracking-tight whitespace-nowrap">KLK-2601</div>
-                      <div class="text-xs text-[#A09F9A] mt-0.5">Raka Pratama · Jemput &amp; Antar Kurir</div>
+                      <div id="staticTrackOrderId" class="font-mono-code text-2xl font-bold text-white tracking-tight whitespace-nowrap">KLK-2601</div>
+                      <div id="staticTrackCustomer" class="text-xs text-[#A09F9A] mt-0.5">Raka Pratama · Jemput &amp; Antar Kurir</div>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-[#1E1E24] text-white border border-[#34343C]">
+                    <span id="staticTrackStageBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-[#1E1E24] text-white border border-[#34343C]">
                       Tahap 3/5 · Detailing / UV
                     </span>
                   </div>
                   <div class="p-4 rounded-xl bg-[#18181C] border border-[#242429] space-y-3">
                     <div>
                       <div class="text-xs text-[#A09F9A]">Unit &amp; Paket Layanan</div>
-                      <div class="text-sm font-bold text-white mt-0.5 leading-snug">Salomon XT-6 White Lunar Rock</div>
-                      <div class="text-xs text-[#D4D4D8] mt-0.5 leading-snug">Deep Clean All Material</div>
+                      <div id="staticTrackItem" class="text-sm font-bold text-white mt-0.5 leading-snug">Salomon XT-6 White Lunar Rock</div>
+                      <div id="staticTrackService" class="text-xs text-[#D4D4D8] mt-0.5 leading-snug">Deep Clean All Material</div>
                     </div>
                     <div class="pt-3 border-t border-[#26262E] flex flex-wrap items-center justify-between gap-2 text-xs">
                       <div>
                         <span class="text-[#A09F9A]">Estimasi: </span>
-                        <span class="font-mono-code font-semibold text-white">Sore Ini, 19.00</span>
+                        <span id="staticTrackEta" class="font-mono-code font-semibold text-white">Sore Ini, 19.00</span>
                       </div>
                       <div>
                         <span class="text-[#A09F9A]">Biaya: </span>
-                        <span class="font-mono-code font-bold text-white">Rp 160.000</span>
+                        <span id="staticTrackPrice" class="font-mono-code font-bold text-white">Rp 160.000</span>
                       </div>
                     </div>
                   </div>
@@ -326,7 +326,7 @@
                   </div>
                   <div class="pt-4 border-t border-[#242429]">
                     <div class="text-xs font-semibold text-[#A09F9A] mb-1.5">Catatan Teknisi</div>
-                    <p class="text-xs sm:text-sm text-[#F3F2EE] leading-relaxed bg-[#18181C] p-3.5 rounded-xl border border-[#242429]">
+                    <p id="staticTrackNote" class="text-xs sm:text-sm text-[#F3F2EE] leading-relaxed bg-[#18181C] p-3.5 rounded-xl border border-[#242429]">
                       "Sedang proses detailing noda midsole dan penyinaran UV."
                     </p>
                   </div>
@@ -338,6 +338,66 @@
         </div>
       </div>
     </section>
+    <script>
+      (function () {
+        try {
+          const slug = window.getActiveMitraSlug ? window.getActiveMitraSlug() : "kultur-kicks";
+          if (!slug || slug === "kultur-kicks") return;
+          const t = window.ServiceStore && window.ServiceStore.getTenant ? window.ServiceStore.getTenant(slug) : null;
+          if (!t) return;
+          if (window.applyWorkshopTheme && t.themePreset) window.applyWorkshopTheme(t.themePreset);
+          const nicheDef = (window.NICHE_DEFINITIONS && window.NICHE_DEFINITIONS[t.niche]) || (window.NICHE_DEFINITIONS && window.NICHE_DEFINITIONS.sneakers_care) || {};
+          const initials = (t.name || "STD").replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "STD";
+          document.title = t.branch ? `${t.name} — ${t.branch}` : t.name;
+          const logoEl = document.getElementById("navLogoBox");
+          if (logoEl) logoEl.textContent = initials;
+          const brandEl = document.getElementById("navBrandName");
+          if (brandEl) brandEl.textContent = t.name;
+          const badgeEl = document.getElementById("navNicheBadge");
+          if (badgeEl && nicheDef.shortLabel) badgeEl.textContent = nicheDef.shortLabel;
+          const branchEl = document.getElementById("navBranchText");
+          if (branchEl) branchEl.textContent = t.branch || "Studio Partner";
+          const h1El = document.getElementById("heroHeadline1");
+          if (h1El && t.heroHeadline1) h1El.textContent = t.heroHeadline1;
+          const h2El = document.getElementById("heroHeadline2");
+          if (h2El && t.heroHeadline2) h2El.textContent = t.heroHeadline2;
+          const descEl = document.getElementById("heroDescText");
+          if (descEl && t.heroDesc) descEl.textContent = t.heroDesc;
+          const locEl = document.getElementById("heroBadgeLocation");
+          if (locEl) locEl.textContent = `${nicheDef.label || "Studio"} · ${t.branch || "Studio Partner"}`;
+          const firstOrd = (t.orders && t.orders[0]) || {
+            orderId: `${initials}-2601`,
+            customerName: "Pelanggan Studio",
+            deliveryType: "Studio",
+            itemName: "Memuat Data Unit...",
+            serviceName: "Sinkronisasi Layanan Studio",
+            etaDate: "Live",
+            price: 0,
+            techNote: "Menghubungkan ke meja operasional studio..."
+          };
+          const searchInp = document.getElementById("resiSearchInput");
+          if (searchInp) searchInp.placeholder = `Ketik Kode Nota (${firstOrd.orderId}) atau No. WA Anda`;
+          const chipsEl = document.getElementById("sampleResiChips");
+          if (chipsEl) {
+            chipsEl.innerHTML = `<button type="button" onclick="selectSampleResi('${firstOrd.orderId}')" class="px-2.5 py-1 rounded-full font-mono-code text-xs font-semibold bg-[var(--brand)] text-white">${firstOrd.orderId}</button>`;
+          }
+          const stOrdId = document.getElementById("staticTrackOrderId");
+          if (stOrdId) stOrdId.textContent = firstOrd.orderId;
+          const stCust = document.getElementById("staticTrackCustomer");
+          if (stCust) stCust.textContent = `${firstOrd.customerName} · ${firstOrd.deliveryType}`;
+          const stItem = document.getElementById("staticTrackItem");
+          if (stItem) stItem.textContent = firstOrd.itemName;
+          const stSrv = document.getElementById("staticTrackService");
+          if (stSrv) stSrv.textContent = firstOrd.serviceName;
+          const stEta = document.getElementById("staticTrackEta");
+          if (stEta) stEta.textContent = firstOrd.etaDate;
+          const stPrice = document.getElementById("staticTrackPrice");
+          if (stPrice && window.formatRupiah) stPrice.textContent = window.formatRupiah(firstOrd.price);
+          const stNote = document.getElementById("staticTrackNote");
+          if (stNote) stNote.textContent = `"${firstOrd.techNote}"`;
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- SECTION 2: STANDAR PENGERJAAN & PERAWATAN MATERIAL -->
     <section id="sopSection" class="py-12 sm:py-16 border-b border-[#DCDAD2]">
@@ -1040,6 +1100,24 @@
         : services.filter(s => (s.category || "Treatment") === activeCategoryFilter);
 
       const catalogMount = document.getElementById("serviceCatalogMount");
+      if (filtered.length === 0) {
+        catalogMount.innerHTML = [1, 2].map(() => `
+          <div class="bg-white rounded-2xl border border-[#DCDAD2] p-4 sm:p-5 flex flex-col justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-24 h-24 sm:w-36 sm:h-36 rounded-xl shrink-0 bg-[#EBE9E2] border border-[#DCDAD2]"></div>
+              <div class="flex-1 min-w-0 space-y-2">
+                <div class="text-sm sm:text-base font-bold text-[#111113]">Memuat Katalog Layanan...</div>
+                <div class="text-xs text-[#78766F]">Sinkronisasi daftar paket studio</div>
+              </div>
+            </div>
+            <div class="pt-4 border-t border-[#EBE9E2] flex items-center justify-between">
+              <span class="font-mono-code text-sm font-bold text-[#78766F]">—</span>
+              <span class="h-9 px-4 rounded-[10px] bg-[#EBE9E2] text-[#78766F] text-xs font-semibold inline-flex items-center">Memuat...</span>
+            </div>
+          </div>
+        `).join("");
+        return;
+      }
       catalogMount.innerHTML = filtered.map((s, idx) => {
         const finalPrice = s.isPromo && s.promoPrice ? s.promoPrice : s.price;
         const safeSrvAlt = (s.name || "Paket Layanan Studio").trim() || "Paket Layanan Studio";
