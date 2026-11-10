@@ -839,12 +839,18 @@ window.SERVICE_ENGINE_CONFIG = {
         ...(map["kultur-kicks"] || Object.values(map)[0]),
         slug: slug,
         name: cleanName,
-        branch: "Memuat...",
+        branch: "",
+        address: "Memuat lokasi studio...",
+        instagram: "",
+        logoUrl: "",
+        heroImageUrl: "",
+        pickupPolicy: "Memuat informasi layanan studio...",
         heroHeadline1: cleanName,
-        heroHeadline2: "Memuat Layanan...",
-        heroDesc: "Sedang menyinkronkan katalog layanan dan data nota terbaru...",
+        heroHeadline2: "Layanan Perawatan & Reservasi Studio.",
+        heroDesc: "Lacak tahapan pengerjaan barang dan reservasi layanan studio secara langsung.",
         services: [],
-        orders: []
+        orders: [],
+        isPlaceholder: true
       };
     },
 
