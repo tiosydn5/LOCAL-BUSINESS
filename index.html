@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title id="pageTitle">Studio Care & Live Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,15 +16,16 @@
   </style>
   <script>
     (function () {
+      const slug = window.getActiveMitraSlug ? window.getActiveMitraSlug() : "kultur-kicks";
+      if (slug === "kultur-kicks") return;
       document.documentElement.classList.add("ws-cloak");
       function uncloak() { document.documentElement.classList.remove("ws-cloak"); }
-      window.addEventListener("ws-cloud-synced", () => setTimeout(uncloak, 50), { once: true });
+      window.addEventListener("ws-cloud-synced", () => setTimeout(uncloak, 30), { once: true });
       window.addEventListener("DOMContentLoaded", () => {
-        const slug = window.getActiveMitraSlug ? window.getActiveMitraSlug() : "kultur-kicks";
         const raw = localStorage.getItem("atelier_service_engine_v4_tenants");
         const map = raw ? JSON.parse(raw) : {};
-        if (map[slug]) setTimeout(uncloak, 30);
-        else setTimeout(uncloak, 1200);
+        if (map[slug]) uncloak();
+        else setTimeout(uncloak, 600);
       });
     })();
   </script>
@@ -699,7 +700,7 @@
       document.getElementById("pageTitle").textContent = `${currentTenant.name} — ${currentTenant.branch}`;
       const logoBox = document.getElementById("navLogoBox");
       if (currentTenant.logoUrl) {
-        logoBox.innerHTML = `<img src="${currentTenant.logoUrl}" alt="${currentTenant.name}" class="w-full h-full object-cover" onerror="this.parentElement.textContent='${initials}'" />`;
+        logoBox.innerHTML = `<img src="${currentTenant.logoUrl}" alt="${currentTenant.name}" fetchpriority="high" class="w-full h-full object-cover" onerror="this.parentElement.textContent='${initials}'" />`;
       } else {
         logoBox.textContent = initials;
       }
@@ -721,7 +722,7 @@
           heroImgWrap.className = "mt-5 rounded-2xl overflow-hidden border border-[#DCDAD2] h-48 sm:h-56 bg-[#EBE9E2]";
           document.getElementById("heroBadgeLocation").parentElement.appendChild(heroImgWrap);
         }
-        heroImgWrap.innerHTML = `<img src="${currentTenant.heroImageUrl}" alt="${currentTenant.name}" class="w-full h-full object-cover" onerror="this.parentElement.remove()" />`;
+        heroImgWrap.innerHTML = `<img src="${currentTenant.heroImageUrl}" alt="${currentTenant.name}" fetchpriority="high" class="w-full h-full object-cover" onerror="this.parentElement.remove()" />`;
       } else if (heroImgWrap) {
         heroImgWrap.remove();
       }
